@@ -68,7 +68,16 @@ namespace EADataContract
 
         private void export()
         {
-            throw new NotImplementedException();
+            var selectedPackage = this.model.selectedTreePackage as Package;
+            if (selectedPackage == null) return;
+            var contract = new ODCSDataContract(selectedPackage);
+            var fileName = "c:\\temp\\" + contract.name + ".yaml";
+            contract.saveToFile(fileName);
+            EAOutputLogger.log(this.model, outputName
+                           , $"Exported '{contract.name}' from package '{selectedPackage.name}' to file '{fileName}'"
+                           , 0
+                          , LogTypeEnum.log);
+
         }
     }
 }

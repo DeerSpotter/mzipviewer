@@ -92,7 +92,7 @@ namespace EADataContract
             this.ownerProperty.modelAttribute.save();
         }
 
-        public override IEnumerable<ODCSItem> getChildItems()
+        public override List<ODCSItem> getChildItems()
         {
             var childItems = new List<ODCSItem>();
             if (this.options != null)
@@ -100,6 +100,21 @@ namespace EADataContract
                 childItems.Add(this.options);
             }
             return childItems;
+        }
+
+        protected override void loadDataFromModel()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void loadYamlNode()
+        {
+            throw new NotImplementedException();
         }
     }
     public enum ODCSLogicalTypeEnum

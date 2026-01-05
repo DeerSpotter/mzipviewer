@@ -21,7 +21,7 @@ namespace EADataContract
         private TSF_EA.Enumeration enumType = null;
         private List<string> enumValues = null;
         private YamlMappingNode qualityNode => this.node as YamlMappingNode;
-        public override IEnumerable<ODCSItem> getChildItems()
+        public override List<ODCSItem> getChildItems()
         {
             return new List<ODCSItem>(); //no child items
         }
@@ -138,6 +138,21 @@ namespace EADataContract
                     this.enumValues.Add(s.Value);
                 }
             }
+        }
+
+        protected override void loadDataFromModel()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void loadYamlNode()
+        {
+            throw new NotImplementedException();
         }
     }
 }

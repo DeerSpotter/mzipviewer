@@ -1,6 +1,7 @@
 ﻿using EAAddinFramework.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,13 +9,18 @@ using TSF.UmlToolingFramework.Wrappers.EA;
 using YamlDotNet.RepresentationModel;
 using TSF_EA = TSF.UmlToolingFramework.Wrappers.EA;
 
+
 namespace EADataContract
 {
     public class ODCSLogicalTypeOptions: ODCSItem
     {
         public ODCSLogicalTypeOptions() { }
+        protected YamlMappingNode mappingNode => (YamlMappingNode)node;
         internal TSF_EA.Attribute modelAttribute => this.modelElement as TSF_EA.Attribute;
-        public ODCSLogicalTypeOptions(YamlNode node, ODCSProperty owner):base(node, owner)
+        public ODCSLogicalTypeOptions(TSF_EA.Attribute modelAttribute) : base(modelAttribute)
+        {
+        }
+        public ODCSLogicalTypeOptions(YamlMappingNode node, ODCSProperty owner):base(node, owner)
         {
             this.maxItems = getIntValue("maxItems");
             this.minItems = getIntValue("minItems");
@@ -48,7 +54,27 @@ namespace EADataContract
         public int? minProperties { get; set; }
         public bool? required { get; set; }
 
-        public override IEnumerable<ODCSItem> getChildItems()
+        static Dictionary<string, string> defaultOptions = new Dictionary<string, string>()
+            {
+                { "maxItems", "-1" },
+                { "minItems", "-1" },
+                { "uniqueItems", "False" },
+                { "format", "" },
+                { "maximum", "" },
+                { "minimum", "" },
+                { "exclusiveMaximum", "" },
+                { "exclusiveMinimum", "" },
+                { "multipleOf", "-1" },
+                { "maxLength", "-1" },
+                { "minLength", "-1" },
+                { "pattern", "" },
+                { "maxProperties", "-1" },
+                { "minProperties", "-1" },
+                { "required", "False" }
+
+            };
+
+        public override List<ODCSItem> getChildItems()
         {
             return new List<ODCSItem>();//empty list
         }
@@ -81,6 +107,124 @@ namespace EADataContract
             this.modelAttribute.addTaggedValue("required", this.required?.ToString());
 
             this.modelAttribute.save();
+        }
+        public static bool hasLogicalTypeOptionsInModel(TSF_EA.Attribute modelAttribute)
+        {
+            
+            foreach (var optionName in defaultOptions.Keys)
+            {
+                var taggedValue = modelAttribute.getTaggedValue(optionName);
+                if (taggedValue != null
+                    && !string.IsNullOrEmpty(taggedValue.eaStringValue)
+                    && !taggedValue.eaStringValue.Equals(defaultOptions[optionName], StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected override void loadDataFromModel()
+        {
+            this.maxItems = this.getIntegerPropertyValue("maxItems");
+            this.minItems = this.getIntegerPropertyValue("minItems");
+            this.uniqueItems = this.getBooleanPropertyValue("uniqueItems");
+            this.format = this.getStringPropertyValue("format");
+            this.maximum = this.getStringPropertyValue("maximum");
+            this.minimum = this.getStringPropertyValue("minimum");
+            this.exclusiveMaximum = this.getStringPropertyValue("exclusiveMaximum");
+            this.exclusiveMinimum = this.getStringPropertyValue("exclusiveMinimum");
+            this.multipleOf = this.getDecimalValue("multipleOf");
+            this.maxLength = this.getIntegerPropertyValue("maxLength");
+            this.minLength = this.getIntegerPropertyValue("minLength");
+            this.pattern = this.getStringPropertyValue("pattern");
+            this.maxProperties = this.getIntegerPropertyValue("maxProperties");
+            this.minProperties = this.getIntegerPropertyValue("minProperties");
+            this.required = this.getBooleanPropertyValue("required");
+        }
+
+        private decimal? getDecimalPropertyValue(string propertyName)
+        {
+            var value = this.modelAttribute.getTaggedValue(propertyName)?.decimalValue;
+            if (value.HasValue
+                && defaultOptions.TryGetValue(propertyName, out var defaultValue))
+            {
+                if (value.Value.ToString().Equals(defaultValue
+                    , StringComparison.InvariantCultureIgnoreCase))
+                {
+                    value = null;
+                }
+            }
+            return value;
+        }
+
+        private bool? getBooleanPropertyValue(string propertyName)
+        {
+            var value = this.modelAttribute.getTaggedValue(propertyName)?.booleanValue;
+            if (value.HasValue
+                && defaultOptions.TryGetValue(propertyName, out var defaultValue))
+            {
+                if (value.Value.ToString().Equals(defaultValue
+                    , StringComparison.InvariantCultureIgnoreCase))
+                {
+                    value = null;
+                }
+            }
+            return value;
+        }
+        private string getStringPropertyValue(string propertyName)
+        {
+            var value = this.modelAttribute.getTaggedValue(propertyName)?.stringValue;
+            if (! string.IsNullOrEmpty(value)
+                && defaultOptions.TryGetValue(propertyName, out var defaultValue))
+            {
+                if (value.Equals(defaultValue, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    value = null;
+                }
+            }
+            return value;
+        }
+
+
+        private int? getIntegerPropertyValue(string propertyName)
+        {
+            var value = this.modelAttribute.getTaggedValue(propertyName)?.integerValue;
+            if (value.HasValue
+                && defaultOptions.TryGetValue(propertyName, out var defaultValue))
+            {
+                if (value.Value.ToString().Equals(defaultValue
+                    , StringComparison.InvariantCultureIgnoreCase))
+                {
+                    value = null;
+                }
+            }
+            return value;
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            //do nothing, no children to get
+        }
+
+        protected override void loadYamlNode()
+        {
+            this.node = new YamlMappingNode();
+            this.addKeyValue("maxItems", this.maxItems);
+            this.addKeyValue("minItems", this.minItems);
+            this.addKeyValue("uniqueItems", this.uniqueItems);
+            this.addKeyValue("format", this.format);
+            this.addKeyValue("maximum", this.maximum);
+            this.addKeyValue("minimum", this.minimum);
+            this.addKeyValue("exclusiveMaximum", this.exclusiveMaximum);
+            this.addKeyValue("exclusiveMinimum", this.exclusiveMinimum);
+            this.addKeyValue("multipleOf", this.multipleOf);
+            this.addKeyValue("maxLength", this.maxLength);
+            this.addKeyValue("minLength", this.minLength);
+            this.addKeyValue("pattern", this.pattern);
+            this.addKeyValue("maxProperties", this.maxProperties);
+            this.addKeyValue("minProperties", this.minProperties);
+            this.addKeyValue("required", this.required);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace EADataContract
     {
         public static string stereotype => profile + "ODCS_Relationship";
         private Association modelAssociation => this.modelElement as Association;
+        private YamlMappingNode mappingNode => (YamlMappingNode)node;
         public string from { get; set; }
         public string to { get; set; }  
         public string type { get; set; }
@@ -22,8 +23,9 @@ namespace EADataContract
             this.to = getStringValue("to");
             this.type = getStringValue("type");
         }
+        public ODCSRelationship(Association association) : base(association) { }
 
-        public override IEnumerable<ODCSItem> getChildItems()
+        public override List<ODCSItem> getChildItems()
         {
             return new List<ODCSItem>(); //no child items
         }
@@ -102,6 +104,24 @@ namespace EADataContract
                         and case when tvo.VALUE = '' then o.Name else coalesce(tvo.Value, o.Name) end = '{className}'
                         and o.Package_ID = {parentPackage.packageID}";
             return context.EAModel.getAttributesByQuery(sqlGetData).FirstOrDefault();
+        }
+
+        protected override void loadDataFromModel()
+        {
+            this.to = this.modelAssociation.target.owner.name + "." + this.modelAssociation.target.name;
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            //no child items to get from model
+        }
+
+        protected override void loadYamlNode()
+        {
+            this.node = new YamlMappingNode();
+            this.addKeyValue("from", this.from);
+            this.addKeyValue("to", this.to);
+            this.addKeyValue("type", this.type);
         }
     }
 }

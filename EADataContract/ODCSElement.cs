@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TSF.UmlToolingFramework.Wrappers.EA;
 using YamlDotNet.RepresentationModel;
 
 namespace EADataContract
@@ -11,6 +12,7 @@ namespace EADataContract
     public abstract class ODCSElement: ODCSItem
     {
         protected YamlMappingNode mappingNode => (YamlMappingNode)node;
+        protected ODCSElement(Element modelElement) : base(modelElement) { }
         public ODCSElement(string name) 
         { 
             this.name = name;
@@ -50,6 +52,29 @@ namespace EADataContract
 
         private List<ODCSQuality> _qualityRules = new List<ODCSQuality>();
         public IEnumerable<ODCSQuality> qualityRules => this._qualityRules;
+
+        protected override void loadDataFromModel()
+        {             
+            this.name = this.modelElement.name;
+            this.description = this.modelElement.notes;
+            this.id = this.modelElement.getTaggedValue("id")?.stringValue;
+            this.physicalName = this.modelElement.getTaggedValue("physicalName")?.stringValue;
+            this.physicalType = this.modelElement.getTaggedValue("physicalType")?.stringValue;
+            this.businessName = this.modelElement.getTaggedValue("businessName")?.stringValue;
+        }
+
+        protected override void loadYamlNode()
+        {
+            this.node = new YamlMappingNode();
+            this.addKeyValue("name", this.name);
+            this.addKeyValue("id", this.id);
+            this.addKeyValue("physicalName", this.physicalName);
+            this.addKeyValue("physicalType", this.physicalType);
+            this.addKeyValue("description", this.description);
+            this.addKeyValue("businessName", this.businessName);
+
+
+        }
 
     }
 }

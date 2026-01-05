@@ -1,5 +1,4 @@
 ﻿using EAAddinFramework.Utilities;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +15,7 @@ namespace EADataContract
         public static string stereotype => profile + "ODCS_Object";
         private string dataGranularityDescription { get;set; }
 
+        public ODCSObject(Element modelElement) : base(modelElement) { }
         public ODCSObject(YamlMappingNode node, ODCSSchema owner) : base(node, owner)
         {
             this.dataGranularityDescription = getStringValue("dataGranularityDescription");
@@ -85,11 +85,40 @@ namespace EADataContract
             this.modelClass.save();
         }
 
-        public override IEnumerable<ODCSItem> getChildItems()
+        public override List<ODCSItem> getChildItems()
         {
             var childItems = new List<ODCSItem>(this.properties);
             childItems.AddRange(this.qualityRules);
             return childItems;
+        }
+
+        protected override void loadDataFromModel()
+        {
+            base.loadDataFromModel();
+            this.dataGranularityDescription = this.modelClass.getTaggedValue("dataGranularityDescription")?.stringValue;
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            foreach (var attribute in this.modelClass.attributes.OfType<Attribute>()
+                                .Where(attr => attr.hasStereotype(ODCSProperty.stereotype)))
+            {
+                var odcsProperty = new ODCSProperty(attribute);
+                this.children.Add(odcsProperty);
+            }
+        }
+
+        protected override void loadYamlNode()
+        {
+            base.loadYamlNode();
+            this.addKeyValue("dataGranularityDescription", this.dataGranularityDescription);
+            //create properties sequence node and load properties
+            var propertiesSequenceNode = new YamlSequenceNode();
+            this.addKeyValue("properties", propertiesSequenceNode);
+            foreach (var property in this.children.OfType<ODCSProperty>())
+            {
+                propertiesSequenceNode.Add(property.node);
+            }
         }
     }
 }

@@ -22,13 +22,21 @@ namespace EADataContract
             this.filePath = filePath;
             this.name = getStringValue("name");
             this.version = getStringValue("version");
-            this.ID = getStringValue("id");
 
             if (root.Children.TryGetValue("schema", out var schemaNode))
             {
                 //create schema
                 this.schema = new ODCSSchema(schemaNode, this);
             }
+        }
+        public void saveToFile(string filePath)
+        {
+            var yamlString = this.getYamlString();
+            File.WriteAllText(filePath, yamlString);
+        }
+        public ODCSDataContract(Package package) : base(package)
+        {
+            this.loadFromModel();
         }
         public void importContract(Package package)
         {
@@ -39,7 +47,6 @@ namespace EADataContract
         public string filePath { get; set; }
         public string name { get; set; }
         public string version { get; set; }
-        public string ID { get; set; }
 
         public ODCSSchema schema { get; set; }
 
@@ -98,7 +105,7 @@ namespace EADataContract
             else
             {
                 //create new package
-                var newPackage = contextPackage.addOwnedElement<Package>(this.name ?? this.ID); //if name not filled in, use ID instead
+                var newPackage = contextPackage.addOwnedElement<Package>(this.name ?? this.id); //if name not filled in, use ID instead
                 newPackage.fqStereotype = stereotype;
                 newPackage.save();
                 this.modelElement = newPackage;
@@ -109,13 +116,34 @@ namespace EADataContract
         {
             this.modelPackage.name = this.name;
             this.modelPackage.version = this.version;
-            this.modelPackage.addTaggedValue("ID", this.ID);
+            this.modelPackage.addTaggedValue("id", this.id);
             this.modelPackage.save();
         }
 
-        public override IEnumerable<ODCSItem> getChildItems()
+        public override List<ODCSItem> getChildItems()
         {
             return new List<ODCSItem>() { this.schema };
+        }
+
+        protected override void loadDataFromModel()
+        {
+            this.name = this.modelPackage.name;
+            this.version = this.modelPackage.version;
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            this.schema = new ODCSSchema(this.modelPackage);
+            this.children.Add(this.schema);
+        }
+
+        protected override void loadYamlNode()
+        {
+            this.node = new YamlMappingNode();
+            this.addKeyValue("name", this.name);
+            this.addKeyValue("version", this.version);
+            this.addKeyValue("id", this.id);
+            this.addKeyValue("schema", this.schema.node);
         }
     }
 }

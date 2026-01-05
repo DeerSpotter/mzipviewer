@@ -18,6 +18,9 @@ namespace EADataContract
         public ODCSProperty(string name) : base(name)
         {
         }
+        public ODCSProperty(Element modelElement) : base(modelElement)
+        {
+        }
         private YamlMappingNode propertyNode => this.node as YamlMappingNode;
         public ODCSProperty(YamlMappingNode node, ODCSObject owner) : base(node, owner)
         {
@@ -52,14 +55,14 @@ namespace EADataContract
                     && this.propertyNode.Children.TryGetValue("logicalTypeOptions", out var optionsNode)
                 && optionsNode is YamlMappingNode)
                 {
-                    _options = new ODCSLogicalTypeOptions(optionsNode, this);
+                    _options = new ODCSLogicalTypeOptions((YamlMappingNode)optionsNode, this);
                 }
                 return _options;
             }
         }
 
 
-        public override IEnumerable<ODCSItem> getChildItems()
+        public override List<ODCSItem> getChildItems()
         {
             var childItems = new List<ODCSItem>();
             if (this.options != null)
@@ -112,6 +115,59 @@ namespace EADataContract
             this.modelAttribute.addTaggedValue("classification", this.classification);
             this.modelAttribute.addTaggedValue("logicalType", this.logicalType);
             this.modelAttribute.save();
+        }
+
+        protected override void loadDataFromModel()
+        {
+            base.loadDataFromModel();
+            this.primaryKey = this.modelAttribute.isID;
+            this.unique = this.modelAttribute.getTaggedValue("unique")?.booleanValue;
+            this.required = this.modelAttribute.lower > 0;
+            this.criticalDataElement = this.modelAttribute.getTaggedValue("criticalDataElement")?.booleanValue;
+            this.classification = modelAttribute.getTaggedValue("classification")?.stringValue;
+            this.logicalType = modelAttribute.getTaggedValue("logicalType")?.stringValue;
+        }
+
+        protected override void getChildrenFromModel()
+        {
+            //check if any of the tagged values for logicaltype options are filled in
+            if (ODCSLogicalTypeOptions.hasLogicalTypeOptionsInModel(this.modelAttribute))
+            {
+                this.children.Add(new ODCSLogicalTypeOptions(this.modelAttribute));
+            }
+            //TODO: check if any quality rules are present
+            //Check for relationships
+            foreach (var modelRelation in this.modelAttribute.getRelationships<Association>(true, false)
+                                            .Where(x => x.hasStereotype(ODCSRelationship.stereotype)))
+            {
+                var relationship = new ODCSRelationship(modelRelation);
+                this.children.Add(relationship);
+            }
+
+        }
+        protected override void loadYamlNode()
+        {
+            base.loadYamlNode();
+            this.addKeyValue("primaryKey", this.primaryKey);
+            this.addKeyValue("unique", this.unique);
+            this.addKeyValue("required", this.required);
+            this.addKeyValue("criticalDataElement", this.criticalDataElement);
+            this.addKeyValue("classification", this.classification);
+            this.addKeyValue("logicalType", this.logicalType);
+            if (this.children.OfType<ODCSLogicalTypeOptions>().FirstOrDefault() is ODCSLogicalTypeOptions options)
+            {
+                this.addKeyValue("logicalTypeOptions", options.node);
+            }
+            if (this.children.OfType<ODCSRelationship>().Any())
+            {
+                //create relationships sequence node and load relationships
+                var relationshipsSequenceNode = new YamlSequenceNode();
+                this.addKeyValue("relationships", relationshipsSequenceNode);
+                foreach (var relationship in this.children.OfType<ODCSRelationship>())
+                {
+                    relationshipsSequenceNode.Add(relationship.node);
+                }
+            }
         }
     }
 
