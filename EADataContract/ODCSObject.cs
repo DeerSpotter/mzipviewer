@@ -106,12 +106,33 @@ namespace EADataContract
                 var odcsProperty = new ODCSProperty(attribute);
                 this.children.Add(odcsProperty);
             }
+            //then constraints
+            foreach (var constraint in this.modelClass.constraints
+                                        .OfType<Constraint>()
+                                        .Where(x => x.specification is OpaqueExpression spec
+                                                && spec.languages.Contains("Quality")))
+            {
+                var qualityRule = new ODCSQuality(constraint);
+                this.children.Add(qualityRule);
+            }
         }
 
         protected override void loadYamlNode()
         {
             base.loadYamlNode();
             this.addKeyValue("dataGranularityDescription", this.dataGranularityDescription);
+            //add quality rules
+            if (this.children.OfType<ODCSQuality>().Any())
+            {
+                //create quality sequence node and load quality rules
+                var qualitySequenceNode = new YamlSequenceNode();
+                this.addKeyValue("quality", qualitySequenceNode);
+                foreach (var qualityRule in this.children.OfType<ODCSQuality>()
+                        .Where(x => x.node != null))
+                {
+                    qualitySequenceNode.Add(qualityRule.node);
+                }
+            }
             //create properties sequence node and load properties
             var propertiesSequenceNode = new YamlSequenceNode();
             this.addKeyValue("properties", propertiesSequenceNode);
@@ -119,6 +140,7 @@ namespace EADataContract
             {
                 propertiesSequenceNode.Add(property.node);
             }
+
         }
     }
 }

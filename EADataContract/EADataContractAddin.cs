@@ -40,6 +40,28 @@ namespace EADataContract
                     break;
             }
         }
+        public override void EA_GetMenuState(EA.Repository Repository, string MenuLocation, string MenuName, string ItemName, ref bool IsEnabled, ref bool IsChecked)
+        {
+            var selectedPackage = this.model.selectedTreePackage as Package;
+            if ( MenuLocation.Equals("Diagram",StringComparison.InvariantCultureIgnoreCase))
+            {
+                IsEnabled = false;
+                return;
+            }
+            switch (ItemName)
+            {
+                case menuImport:
+                    IsEnabled = (selectedPackage != null);
+                    break;
+                case menuExport:
+                    IsEnabled = (selectedPackage != null
+                                && selectedPackage.hasStereotype(ODCSDataContract.stereotype));
+                    break;
+                case menuAbout:
+                    IsEnabled = true;
+                    break;
+            }
+        }
 
         private void import()
         {
@@ -70,13 +92,20 @@ namespace EADataContract
         {
             var selectedPackage = this.model.selectedTreePackage as Package;
             if (selectedPackage == null) return;
+            var userSelectedContract = ODCSDataContract.getUserSelectedContract(true);
+            if (userSelectedContract == null) return;
+            var fileName = userSelectedContract.filePath;
+            EAOutputLogger.clearLog(this.model, outputName);
+            EAOutputLogger.log(this.model, outputName
+                           , $"Starting export of package '{selectedPackage.name}' to file '{fileName}'"
+                           , 0
+                           , LogTypeEnum.log);
             var contract = new ODCSDataContract(selectedPackage);
-            var fileName = "c:\\temp\\" + contract.name + ".yaml";
             contract.saveToFile(fileName);
             EAOutputLogger.log(this.model, outputName
-                           , $"Exported '{contract.name}' from package '{selectedPackage.name}' to file '{fileName}'"
+                           , $"Finished export of package '{selectedPackage.name}' to file '{fileName}'"
                            , 0
-                          , LogTypeEnum.log);
+                           , LogTypeEnum.log);
 
         }
     }

@@ -55,28 +55,56 @@ namespace EADataContract
             var yamlText = File.ReadAllText(filePath);
             var yaml = new YamlStream();
             yaml.Load(new StringReader(yamlText));
-
+            //check if there is a root node. If not, create an empty one
+            if (yaml.Documents.Count == 0 || yaml.Documents[0].RootNode == null)
+            {
+                yaml.Documents.Add(new YamlDocument(new YamlMappingNode()));
+            }
             var root = (YamlMappingNode)yaml.Documents[0]?.RootNode;
             var dataContract = new ODCSDataContract(filePath, root);
             return dataContract;
         }
-        public static ODCSDataContract getUserSelectedContract()
+        public static ODCSDataContract getUserSelectedContract(bool saveAs = false)
         {
             ODCSDataContract dataContract = null;
-            //Let the user select a .yaml file
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            string filePath = null;
+            if (saveAs)
             {
-                Title = "Select a Datacontract file",
-                Filter = "Datacontract files (*.yaml;*.yml)|*.yaml;*.yml|All files (*.*)|*.*",
-                FilterIndex = 1,
-                Multiselect = false
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                var filePath = openFileDialog.FileName;
-                dataContract = Parse(filePath);
+                //Let the user select a location to save the .yaml file
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Title = "Select a location to save the Datacontract file",
+                    Filter = "Datacontract files (*.yaml;*.yml)|*.yaml;*.yml|All files (*.*)|*.*",
+                    FilterIndex = 1,
+                    DefaultExt = "yaml",
+                };
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    filePath = saveFileDialog.FileName;
+                    //if the file doesn't exist, create it
+                    if (!File.Exists(filePath))
+                    { 
+                        File.Create(filePath).Close();
+                    }
+                }
             }
+            else
+            {
+                //Let the user select a .yaml file
+                OpenFileDialog openFileDialog = new OpenFileDialog
+                {
+                    Title = "Select a Datacontract file",
+                    Filter = "Datacontract files (*.yaml;*.yml)|*.yaml;*.yml|All files (*.*)|*.*",
+                    FilterIndex = 1,
+                    Multiselect = false,
+                };
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    filePath = openFileDialog.FileName;
+                }
+            }
+            dataContract = Parse(filePath);
             return dataContract;
         }
 

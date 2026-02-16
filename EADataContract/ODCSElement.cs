@@ -25,6 +25,7 @@ namespace EADataContract
             this.physicalType = getStringValue("physicalType");
             this.description = getStringValue("description");
             this.businessName = getStringValue("businessName");
+            this.authoritativeDefinitions = getStringValue("authoritativeDefinitions");
             if (node.Children.TryGetValue("quality", out var qualityNode)
                 && qualityNode is YamlSequenceNode)
             {
@@ -43,12 +44,14 @@ namespace EADataContract
             this.modelElement.addTaggedValue("physicalName", this.physicalName);
             this.modelElement.addTaggedValue("physicalType", this.physicalType);
             this.modelElement.addTaggedValue("businessName", this.businessName);
+            this.modelElement.addTaggedValue("authoritativeDefinitions","<memo>" , this.authoritativeDefinitions);
         }
         public string name { get; set; }
         public string physicalName { get; set; }
         public string physicalType { get; set; }
         public string description { get; set; }
         public string businessName { get; set; }
+        public string authoritativeDefinitions { get; set; }
 
         private List<ODCSQuality> _qualityRules = new List<ODCSQuality>();
         public IEnumerable<ODCSQuality> qualityRules => this._qualityRules;
@@ -61,6 +64,7 @@ namespace EADataContract
             this.physicalName = this.modelElement.getTaggedValue("physicalName")?.stringValue;
             this.physicalType = this.modelElement.getTaggedValue("physicalType")?.stringValue;
             this.businessName = this.modelElement.getTaggedValue("businessName")?.stringValue;
+            this.authoritativeDefinitions = this.modelElement.getTaggedValue("authoritativeDefinitions")?.comment;
         }
 
         protected override void loadYamlNode()
@@ -72,9 +76,18 @@ namespace EADataContract
             this.addKeyValue("physicalType", this.physicalType);
             this.addKeyValue("description", this.description);
             this.addKeyValue("businessName", this.businessName);
-
-
+            this.addKeyValue("authoritativeDefinitions", this.authoritativeDefinitions);
+            if (this.children.OfType<ODCSQuality>().Any())
+            {
+                //create quality sequence node and load quality rules
+                var qualitySequenceNode = new YamlSequenceNode();
+                this.addKeyValue("quality", qualitySequenceNode);
+                foreach (var qualityRule in this.children.OfType<ODCSQuality>()
+                        .Where(x => x.node != null))
+                {
+                    qualitySequenceNode.Add(qualityRule.node);
+                }
+            }
         }
-
     }
 }

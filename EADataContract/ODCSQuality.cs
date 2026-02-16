@@ -18,9 +18,21 @@ namespace EADataContract
         public ODCSQuality(YamlNode node, ODCSElement owner) : base(node, owner)
         {
         }
+        public ODCSQuality(TSF_EA.Attribute attribute) : base(attribute)
+        {
+            this.modelElement = attribute;
+        }
+        public ODCSQuality(TSF_EA.AttributeConstraint constraint) : base(constraint)
+        {
+            this.modelElement = constraint;
+        }
+        public ODCSQuality(TSF_EA.Constraint constraint) : base(constraint)
+        {
+            this.modelElement = constraint;
+        }
         private TSF_EA.Enumeration enumType = null;
         private List<string> enumValues = null;
-        private YamlMappingNode qualityNode => this.node as YamlMappingNode;
+        private YamlMappingNode qualityNode => (YamlMappingNode)this.node;
         public override List<ODCSItem> getChildItems()
         {
             return new List<ODCSItem>(); //no child items
@@ -140,19 +152,55 @@ namespace EADataContract
             }
         }
 
+
+
         protected override void loadDataFromModel()
         {
-            throw new NotImplementedException();
+            //do nothing.. data is loaded in loadYamlNode
         }
-
         protected override void getChildrenFromModel()
         {
-            throw new NotImplementedException();
+            //do nothing, no child items
         }
 
         protected override void loadYamlNode()
         {
-            throw new NotImplementedException();
+            if (this.modelElement is UML.Classes.Kernel.Constraint constraint)
+            {
+                //load quality rule from constraint
+                var spec = constraint.specification as OpaqueExpression;
+                if (spec != null && spec.languages.Contains("Quality"))
+                {
+                    var contentNode = this.getNodeFromString(spec.bodies.FirstOrDefault());
+                    if (contentNode is YamlMappingNode)
+                    {
+                        this.node = contentNode;
+                    }
+                }
+            }
+            else if (this.modelElement is TSF_EA.Attribute attribute)
+            {
+                //load quality rule from enumeration attribute
+                this.enumType = attribute.type as TSF_EA.Enumeration;
+                if (this.enumType != null)
+                {
+                    this.node = new YamlMappingNode();
+                    //load enum values
+                    this.enumValues = this.enumType.ownedLiterals.Select(x => x.name).ToList();
+                    //construct yaml node
+                    this.qualityNode.Add("id", this.enumType.name);
+                    this.qualityNode.Add("metric", new YamlScalarNode("invalidValues"));
+                    this.qualityNode.Add("mustBe", new YamlScalarNode("0"));
+                    var argumentsNode = new YamlMappingNode();
+                    var validValuesSeq = new YamlSequenceNode();
+                    foreach (var enumValue in this.enumValues)
+                    {
+                        validValuesSeq.Add(new YamlScalarNode(enumValue));
+                    }
+                    argumentsNode.Add("validValues", validValuesSeq);
+                    qualityNode.Add("arguments", argumentsNode);
+                }
+            }
         }
     }
 }

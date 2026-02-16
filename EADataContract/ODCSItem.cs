@@ -62,6 +62,17 @@ namespace EADataContract
         protected abstract void loadDataFromModel();
         protected abstract void getChildrenFromModel(); 
 
+        protected YamlNode getNodeFromString(string yamlString)
+        {
+            var input = new StringReader(yamlString);
+            var yaml = new YamlStream();
+            yaml.Load(input);
+            if (yaml.Documents.Count > 0)
+            {
+                return yaml.Documents[0].RootNode;
+            }
+            return null;
+        }
         protected TSF_EA.Element importToModel(TSF_EA.Element context, int position)
         {
             this.getModelElement(context);
@@ -129,7 +140,16 @@ namespace EADataContract
             }
             if (!string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(key))
             {
-                mappingNode.Add(new YamlScalarNode(key), new YamlScalarNode(value));
+                //check if the value can be parsed as a sequenceNode, and add that if needed
+                var valueNode = this.parseSequenceNode(value);
+                if (valueNode != null)
+                {
+                    mappingNode.Add(new YamlScalarNode(key), valueNode);
+                }
+                else
+                {
+                    mappingNode.Add(new YamlScalarNode(key), new YamlScalarNode(value));
+                }
             }
         }
         protected void addKeyValue(string key, bool? value)
@@ -175,11 +195,16 @@ namespace EADataContract
         {
             if (this.node is YamlMappingNode mappingNode)
             {
-                if (mappingNode.Children.TryGetValue(key, out var valueNode)
-                    && valueNode is YamlScalarNode)
-                {
-                    return ((YamlScalarNode)valueNode).Value;
-                }
+                if (mappingNode.Children.TryGetValue(key, out var valueNode))
+                    if (valueNode is YamlScalarNode)
+                    {
+                        return ((YamlScalarNode)valueNode).Value;
+                    }
+                    else
+                    {
+                        //if it's not a scalar node, then simply serialize the node the node to get the yamlText
+                        return new SerializerBuilder().Build().Serialize(valueNode).Trim();
+                    }
             }
             return null;
         }
@@ -219,6 +244,22 @@ namespace EADataContract
         public override string ToString()
         {
             return this.node?.ToString();
+        }
+        protected YamlSequenceNode parseSequenceNode(string contents)
+        { 
+            if (string.IsNullOrEmpty(contents)) return null;
+            var input = new StringReader(contents);
+            var yaml = new YamlStream();
+            yaml.Load(input);
+            if (yaml.Documents.Count > 0)
+            {
+                var rootNode = yaml.Documents[0].RootNode;
+                if (rootNode is YamlSequenceNode sequenceNode)
+                {
+                    return sequenceNode;
+                }
+            }
+            return null;
         }
 
     }

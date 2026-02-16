@@ -17,6 +17,7 @@
 					<Tag name="businessName" type="" description="" unit="" values="" default=""/>
 					<Tag name="physicalName" type="" description="" unit="" values="" default=""/>
 					<Tag name="physicalType" type="" description="" unit="" values="" default=""/>
+					<Tag name="authoritativeDefinitions" type="Memo" description="" unit="" values="" default=""/>
 				</TaggedValues>
 			</Stereotype>
 			<Stereotype name="ODCS_LogicalType" metatype="Logical Type" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
@@ -71,15 +72,19 @@
 					</Apply>
 				</AppliesTo>
 				<TaggedValues>
+					<Tag name="primaryKeyPosition" type="Integer" description="" unit="" values="" default="-1"/>
 					<Tag name="logicalType" type="enumeration" description="" unit="" values="string,date,number,integer,object,array,boolean" default="string"/>
+					<Tag name="unique" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="partitioned" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="partitionKeyPosition" type="Integer" description="" unit="" values="" default="-1"/>
 					<Tag name="classification" type="" description="" unit="" values="" default=""/>
 					<Tag name="criticalDataElement" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="examples" type="Memo" description="" unit="" values="" default=""/>
 					<Tag name="required" type="Boolean" description="" unit="" values="True,False" default="False"/>
 					<Tag name="defaultTimezone" type="" description="" unit="" values="" default=""/>
 					<Tag name="timezone" type="" description="" unit="" values="" default=""/>
 					<Tag name="maxItems" type="Integer" description="" unit="" values="" default="-1"/>
 					<Tag name="minItems" type="Integer" description="" unit="" values="" default="-1"/>
-					<Tag name="unique" type="Boolean" description="" unit="" values="True,False" default="False"/>
 					<Tag name="uniqueItems" type="Boolean" description="" unit="" values="True,False" default="False"/>
 					<Tag name="format" type="" description="" unit="" values="" default=""/>
 					<Tag name="exclusiveMaximum" type="" description="" unit="" values="" default=""/>
@@ -113,6 +118,7 @@
 			<TaggedValueType property="Boolean" description="" notes="Type=Boolean;"/>
 			<TaggedValueType property="Decimal" description="" notes="Type=Decimal;"/>
 			<TaggedValueType property="Integer" description="" notes="Type=Integer;"/>
+			<TaggedValueType property="Memo" description="" notes="Type=Memo;"/>
 		</TaggedValueTypes>
 		<ViewDefinitions/>
 		<Metamodel/>

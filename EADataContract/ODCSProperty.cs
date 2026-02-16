@@ -30,6 +30,7 @@ namespace EADataContract
             this.criticalDataElement = getBooleanValue("criticalDataElement");
             this.classification = getStringValue("classification");
             this.logicalType = getStringValue("logicalType");
+            this.examples = getStringValue("examples");
             //get logicalTypeOptions if present
             YamlMappingNode logicalTypeOptionsNode = null;
             //check for sibling node with key logicalTypeOptions
@@ -45,6 +46,8 @@ namespace EADataContract
         public bool? criticalDataElement { get; set; }
         public string classification { get; set; }
         public string logicalType { get; set; }
+        public string examples { get; set; }
+
 
         private ODCSLogicalTypeOptions _options = null;
         public ODCSLogicalTypeOptions options
@@ -114,6 +117,8 @@ namespace EADataContract
             this.modelAttribute.addTaggedValue("criticalDataElement", this.criticalDataElement?.ToString());
             this.modelAttribute.addTaggedValue("classification", this.classification);
             this.modelAttribute.addTaggedValue("logicalType", this.logicalType);
+            this.modelAttribute.addTaggedValue("examples","<memo>", this.examples);
+
             this.modelAttribute.save();
         }
 
@@ -126,6 +131,7 @@ namespace EADataContract
             this.criticalDataElement = this.modelAttribute.getTaggedValue("criticalDataElement")?.booleanValue;
             this.classification = modelAttribute.getTaggedValue("classification")?.stringValue;
             this.logicalType = modelAttribute.getTaggedValue("logicalType")?.stringValue;
+            this.examples = modelAttribute.getTaggedValue("examples")?.comment;
         }
 
         protected override void getChildrenFromModel()
@@ -135,13 +141,28 @@ namespace EADataContract
             {
                 this.children.Add(new ODCSLogicalTypeOptions(this.modelAttribute));
             }
-            //TODO: check if any quality rules are present
             //Check for relationships
             foreach (var modelRelation in this.modelAttribute.getRelationships<Association>(true, false)
                                             .Where(x => x.hasStereotype(ODCSRelationship.stereotype)))
             {
                 var relationship = new ODCSRelationship(modelRelation);
                 this.children.Add(relationship);
+            }
+            //get quality rules
+            //first enumeration
+            if (this.modelAttribute.type is TSF_EA.Enumeration)
+            {
+                var qualityRule = new ODCSQuality(this.modelAttribute);
+                this.children.Add(qualityRule);
+            }
+            //then constraints
+            foreach (var constraint in this.modelAttribute.constraints
+                                        .OfType<TSF_EA.AttributeConstraint>()
+                                        .Where(x => x.specification is OpaqueExpression spec
+                                                && spec.languages.Contains("Quality")))
+            {
+                var qualityRule = new ODCSQuality(constraint);
+                this.children.Add(qualityRule);
             }
 
         }
@@ -153,6 +174,7 @@ namespace EADataContract
             this.addKeyValue("required", this.required);
             this.addKeyValue("criticalDataElement", this.criticalDataElement);
             this.addKeyValue("classification", this.classification);
+            this.addKeyValue("examples", this.examples);
             this.addKeyValue("logicalType", this.logicalType);
             if (this.children.OfType<ODCSLogicalTypeOptions>().FirstOrDefault() is ODCSLogicalTypeOptions options)
             {
@@ -168,6 +190,8 @@ namespace EADataContract
                     relationshipsSequenceNode.Add(relationship.node);
                 }
             }
+
+            
         }
     }
 

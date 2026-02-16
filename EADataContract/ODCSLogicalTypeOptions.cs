@@ -134,7 +134,7 @@ namespace EADataContract
             this.minimum = this.getStringPropertyValue("minimum");
             this.exclusiveMaximum = this.getStringPropertyValue("exclusiveMaximum");
             this.exclusiveMinimum = this.getStringPropertyValue("exclusiveMinimum");
-            this.multipleOf = this.getDecimalValue("multipleOf");
+            this.multipleOf = this.getDecimalPropertyValue("multipleOf");
             this.maxLength = this.getIntegerPropertyValue("maxLength");
             this.minLength = this.getIntegerPropertyValue("minLength");
             this.pattern = this.getStringPropertyValue("pattern");
