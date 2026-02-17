@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Management.Instrumentation;
 using System.Text;
 using System.Threading.Tasks;
 using YamlDotNet.Core;
@@ -141,15 +142,8 @@ namespace EADataContract
             if (!string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(key))
             {
                 //check if the value can be parsed as a sequenceNode, and add that if needed
-                var valueNode = this.parseSequenceNode(value);
-                if (valueNode != null)
-                {
-                    mappingNode.Add(new YamlScalarNode(key), valueNode);
-                }
-                else
-                {
-                    mappingNode.Add(new YamlScalarNode(key), new YamlScalarNode(value));
-                }
+                var valueNode = this.parseYamlNode(value);
+                mappingNode.Add(new YamlScalarNode(key), valueNode);
             }
         }
         protected void addKeyValue(string key, bool? value)
@@ -245,21 +239,24 @@ namespace EADataContract
         {
             return this.node?.ToString();
         }
-        protected YamlSequenceNode parseSequenceNode(string contents)
+        protected YamlNode parseYamlNode(string contents)
         { 
             if (string.IsNullOrEmpty(contents)) return null;
             var input = new StringReader(contents);
             var yaml = new YamlStream();
             yaml.Load(input);
+            YamlNode node = null;
             if (yaml.Documents.Count > 0)
             {
-                var rootNode = yaml.Documents[0].RootNode;
-                if (rootNode is YamlSequenceNode sequenceNode)
-                {
-                    return sequenceNode;
-                }
+                //get the parsed node
+                node = yaml.Documents[0].RootNode;
             }
-            return null;
+            else
+            {
+                //make a new scalar node
+                node = new YamlScalarNode(contents);
+            }
+            return node;
         }
 
     }

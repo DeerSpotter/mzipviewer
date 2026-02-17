@@ -26,6 +26,8 @@ namespace EADataContract
             this.description = getStringValue("description");
             this.businessName = getStringValue("businessName");
             this.authoritativeDefinitions = getStringValue("authoritativeDefinitions");
+            this.tags = getStringValue("tags");
+            this.customProperties = getStringValue("customProperties");
             if (node.Children.TryGetValue("quality", out var qualityNode)
                 && qualityNode is YamlSequenceNode)
             {
@@ -45,6 +47,8 @@ namespace EADataContract
             this.modelElement.addTaggedValue("physicalType", this.physicalType);
             this.modelElement.addTaggedValue("businessName", this.businessName);
             this.modelElement.addTaggedValue("authoritativeDefinitions","<memo>" , this.authoritativeDefinitions);
+            this.modelElement.addTaggedValue("tags", "<memo>", this.tags);
+            this.modelElement.addTaggedValue("customProperties", "<memo>", this.customProperties);
         }
         public string name { get; set; }
         public string physicalName { get; set; }
@@ -52,6 +56,8 @@ namespace EADataContract
         public string description { get; set; }
         public string businessName { get; set; }
         public string authoritativeDefinitions { get; set; }
+        public string tags { get; set; }
+        public string customProperties { get; set; }
 
         private List<ODCSQuality> _qualityRules = new List<ODCSQuality>();
         public IEnumerable<ODCSQuality> qualityRules => this._qualityRules;
@@ -65,6 +71,8 @@ namespace EADataContract
             this.physicalType = this.modelElement.getTaggedValue("physicalType")?.stringValue;
             this.businessName = this.modelElement.getTaggedValue("businessName")?.stringValue;
             this.authoritativeDefinitions = this.modelElement.getTaggedValue("authoritativeDefinitions")?.comment;
+            this.tags = this.modelElement.getTaggedValue("tags")?.comment;
+            this.customProperties = this.modelElement.getTaggedValue("customProperties")?.comment;
         }
 
         protected override void loadYamlNode()
@@ -77,6 +85,8 @@ namespace EADataContract
             this.addKeyValue("description", this.description);
             this.addKeyValue("businessName", this.businessName);
             this.addKeyValue("authoritativeDefinitions", this.authoritativeDefinitions);
+            this.addKeyValue("tags", this.tags);
+            this.addKeyValue("customProperties", this.customProperties);
             if (this.children.OfType<ODCSQuality>().Any())
             {
                 //create quality sequence node and load quality rules

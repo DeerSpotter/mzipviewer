@@ -18,6 +18,8 @@
 					<Tag name="physicalName" type="" description="" unit="" values="" default=""/>
 					<Tag name="physicalType" type="" description="" unit="" values="" default=""/>
 					<Tag name="authoritativeDefinitions" type="Memo" description="" unit="" values="" default=""/>
+					<Tag name="tags" type="Memo" description="" unit="" values="" default=""/>
+					<Tag name="customProperties" type="Memo" description="" unit="" values="" default=""/>
 				</TaggedValues>
 			</Stereotype>
 			<Stereotype name="ODCS_LogicalType" metatype="Logical Type" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
@@ -123,7 +125,7 @@
 		<ViewDefinitions/>
 		<Metamodel/>
 	</Content>
-</UMLProfile></UMLProfiles><DDLModules/><DiagramProfile><UMLProfile profiletype="uml2">
+</UMLProfile></UMLProfiles><DiagramProfile><UMLProfile profiletype="uml2">
 	<Documentation id="FFA707967B" name="ODCS" version="1.0" notes="ODCS"/>
 	<Content>
 		<Stereotypes>
