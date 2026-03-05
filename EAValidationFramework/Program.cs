@@ -22,7 +22,10 @@ namespace EAValidatorApp
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                var controller = new EAValidatorController(new Model(eaRepository), new EAValidatorSettings());
+                var model = new Model(eaRepository);
+                var settings = new EAValidatorSettings();
+                settings.model = model;
+                var controller = new EAValidatorController(model, settings);
                 Application.Run(new frmEAValidator(controller));
             }
         }

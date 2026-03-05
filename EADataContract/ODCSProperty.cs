@@ -25,6 +25,7 @@ namespace EADataContract
         public ODCSProperty(YamlMappingNode node, ODCSObject owner) : base(node, owner)
         {
             this.primaryKey = getBooleanValue("primaryKey");
+            this.primaryKeyPosition = getIntValue("primaryKeyPosition");
             this.unique = getBooleanValue("unique");
             this.required = getBooleanValue("required");
             this.criticalDataElement = getBooleanValue("criticalDataElement");
@@ -41,6 +42,7 @@ namespace EADataContract
             }
         }
         public bool? primaryKey { get; set; }
+        public int? primaryKeyPosition { get; set; }
         public bool? unique { get; set; }
         public bool? required { get; set; }
         public bool? criticalDataElement { get; set; }
@@ -118,6 +120,7 @@ namespace EADataContract
             this.modelAttribute.addTaggedValue("classification", this.classification);
             this.modelAttribute.addTaggedValue("logicalType", this.logicalType);
             this.modelAttribute.addTaggedValue("examples","<memo>", this.examples);
+            this.modelAttribute.addTaggedValue("primaryKeyPosition", this.primaryKeyPosition?.ToString());
 
             this.modelAttribute.save();
         }
@@ -132,6 +135,7 @@ namespace EADataContract
             this.classification = modelAttribute.getTaggedValue("classification")?.stringValue;
             this.logicalType = modelAttribute.getTaggedValue("logicalType")?.stringValue;
             this.examples = modelAttribute.getTaggedValue("examples")?.comment;
+            this.primaryKeyPosition = modelAttribute.getTaggedValue("primaryKeyPosition")?.integerValue;
         }
 
         protected override void getChildrenFromModel()
@@ -170,6 +174,7 @@ namespace EADataContract
         {
             base.loadYamlNode();
             this.addKeyValue("primaryKey", this.primaryKey);
+            this.addKeyValue("primaryKeyPosition", this.primaryKeyPosition);
             this.addKeyValue("unique", this.unique);
             this.addKeyValue("required", this.required);
             this.addKeyValue("criticalDataElement", this.criticalDataElement);
