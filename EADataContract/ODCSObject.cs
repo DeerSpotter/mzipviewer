@@ -121,18 +121,6 @@ namespace EADataContract
         {
             base.loadYamlNode();
             this.addKeyValue("dataGranularityDescription", this.dataGranularityDescription);
-            //add quality rules
-            if (this.children.OfType<ODCSQuality>().Any())
-            {
-                //create quality sequence node and load quality rules
-                var qualitySequenceNode = new YamlSequenceNode();
-                this.addKeyValue("quality", qualitySequenceNode);
-                foreach (var qualityRule in this.children.OfType<ODCSQuality>()
-                        .Where(x => x.node != null))
-                {
-                    qualitySequenceNode.Add(qualityRule.node);
-                }
-            }
             //create properties sequence node and load properties
             var propertiesSequenceNode = new YamlSequenceNode();
             this.addKeyValue("properties", propertiesSequenceNode);

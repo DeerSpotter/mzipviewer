@@ -102,6 +102,7 @@ namespace EADataContract
                 i++;
             }
         }
+
         protected void getRelationships()
         {
             YamlNode relationshipsNode = null;
@@ -134,7 +135,11 @@ namespace EADataContract
         public TSF_EA.Element modelElement { get; protected set; } = null;
         protected void addKeyValue( string key, string value)
         {
-            var mappingNode = this.node as YamlMappingNode;
+            this.addKeyValue(key, value, this.node);
+        }
+        protected void addKeyValue(string key, string value, YamlNode node)
+        {
+            var mappingNode = node as YamlMappingNode;
             if (mappingNode == null)
             {
                 throw new InvalidDataException("Cannot add key value pair to non-mapping node");
@@ -143,8 +148,31 @@ namespace EADataContract
             {
                 //check if the value can be parsed as a sequenceNode, and add that if needed
                 var valueNode = this.parseYamlNode(value);
-                mappingNode.Add(new YamlScalarNode(key), valueNode);
+                this.addKeyValue(key, mappingNode, valueNode);
             }
+        }
+        protected void addKeyValue(string key, YamlMappingNode mappingNode, YamlNode valueNode)
+        {
+            if (valueNode != null && !string.IsNullOrEmpty(key))
+            {
+                if (mappingNode.Children.ContainsKey(key))
+                {
+                    mappingNode.Children[key] = valueNode;
+                }
+                else
+                {
+                    mappingNode.Add(new YamlScalarNode(key), valueNode);
+                }
+            }
+        }
+        protected void addKeyValue(string key, YamlNode valueNode)
+        {
+            var mappingNode = this.node as YamlMappingNode;
+            if (mappingNode == null)
+            {
+                throw new InvalidDataException("Cannot add key value pair to non-mapping node");
+            }
+            this.addKeyValue(key, mappingNode, valueNode);
         }
         protected void addKeyValue(string key, bool? value)
         {
@@ -167,18 +195,7 @@ namespace EADataContract
                 addKeyValue(key, value.Value.ToString(CultureInfo.InvariantCulture));
             }
         }
-        protected void addKeyValue(string key, YamlNode valueNode)
-        {
-            var mappingNode = this.node as YamlMappingNode;
-            if (mappingNode == null)
-            {
-                throw new InvalidDataException("Cannot add key value pair to non-mapping node");
-            }
-            if (valueNode != null && !string.IsNullOrEmpty(key))
-            {
-                mappingNode.Add(new YamlScalarNode(key), valueNode);
-            }
-        }
+
         public string getYamlString()
         {
 
@@ -188,6 +205,23 @@ namespace EADataContract
         protected string getStringValue(string key)
         {
             if (this.node is YamlMappingNode mappingNode)
+            {
+                if (mappingNode.Children.TryGetValue(key, out var valueNode))
+                    if (valueNode is YamlScalarNode)
+                    {
+                        return ((YamlScalarNode)valueNode).Value;
+                    }
+                    else
+                    {
+                        //if it's not a scalar node, then simply serialize the node the node to get the yamlText
+                        return new SerializerBuilder().Build().Serialize(valueNode).Trim();
+                    }
+            }
+            return null;
+        }
+        protected string getStringValue(string key, YamlNode node)
+        {
+            if (node is YamlMappingNode mappingNode)
             {
                 if (mappingNode.Children.TryGetValue(key, out var valueNode))
                     if (valueNode is YamlScalarNode)

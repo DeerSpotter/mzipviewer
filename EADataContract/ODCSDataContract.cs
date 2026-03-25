@@ -43,6 +43,9 @@ namespace EADataContract
             this.importToModel(package, 0);
             EAOutputLogger.log("Importing Relationships" , 0, LogTypeEnum.log);
             this.importRelationships(0);
+            //do the cleanup
+            EAOutputLogger.log("Cleanup...", 0, LogTypeEnum.log);
+            this.cleanUp();
         }
         public string filePath { get; set; }
         public string name { get; set; }
@@ -172,6 +175,42 @@ namespace EADataContract
             this.addKeyValue("version", this.version);
             this.addKeyValue("id", this.id);
             this.addKeyValue("schema", this.schema.node);
+        }
+        protected void cleanUp()
+        {
+            //find all enumeration that are identical, and merge them into one.
+            var enumerations = this.modelPackage.getOwnedElementWrappers<Enumeration>(string.Empty, true);
+            var deletedEnumIds = new HashSet<string>();
+            foreach (var enumeration in enumerations)
+            {
+                //skip enum if it was already deleted
+                if (deletedEnumIds.Contains(enumeration.uniqueID)) continue;
+                //find identical enums
+                var identicalEnumerations = enumerations.Where( x => x.name == enumeration.name 
+                                                                && x.id != enumeration.id
+                                                                && x.ownedLiterals.Select(y => y.name).OrderBy(y => y).SequenceEqual(enumeration.ownedLiterals.Select(y => y.name).OrderBy(y => y)) );
+                foreach (var identicalEnumeration in identicalEnumerations)
+                {
+                    EAOutputLogger.log($"Merging enumeration '{identicalEnumeration.name}'", 0, LogTypeEnum.log);
+                    //replace all attributes using the identical enumeration with the current enumeration
+                    foreach (var attribute in identicalEnumeration.getUsingAttributes())
+                    {
+                        attribute.type = enumeration;
+                        attribute.save();
+                    }
+                    //add id to deleted enums list
+                    deletedEnumIds.Add(identicalEnumeration.uniqueID);
+                    //delete the identical enumeration
+                    identicalEnumeration.delete();
+                }
+            }
+
+            //delete any enumerations that are not used by any attributes
+            foreach (var enumeration in this.modelPackage.getOwnedElementWrappers<Enumeration>(string.Empty, true).Where(x => x.getUsingAttributes().Count == 0))
+            {
+                EAOutputLogger.log($"Deleting enumeration '{enumeration.name}'", 0, LogTypeEnum.log);
+                enumeration.delete();
+            }
         }
     }
 }

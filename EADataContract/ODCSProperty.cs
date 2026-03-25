@@ -40,6 +40,18 @@ namespace EADataContract
             {
                 logicalTypeOptionsNode = (YamlMappingNode)optionsNode;
             }
+            //if the logical type is array, we check for the items section and get the logicalType from there instead
+            if (this.logicalType == "array")
+            {
+                this.isArray = true;
+                if (node.Children.TryGetValue("items", out var itemsNode)
+                    && itemsNode is YamlMappingNode itemsMappingNode)
+                {
+                    this.logicalType = getStringValue("logicalType", itemsMappingNode);
+                    this.physicalType = getStringValue("physicalType", itemsMappingNode);
+                    this.upperBound = new UnlimitedNatural("*");
+                }
+            }
         }
         public bool? primaryKey { get; set; }
         public int? primaryKeyPosition { get; set; }
@@ -49,6 +61,8 @@ namespace EADataContract
         public string classification { get; set; }
         public string logicalType { get; set; }
         public string examples { get; set; }
+        public bool isArray { get; set; } = false;
+        public UnlimitedNatural upperBound { get; set; } = new UnlimitedNatural("1");
 
 
         private ODCSLogicalTypeOptions _options = null;
@@ -116,6 +130,7 @@ namespace EADataContract
             this.modelAttribute.isID = this.primaryKey == true;
             this.modelAttribute.addTaggedValue("unique", this.unique?.ToString());
             this.modelAttribute.lower = (uint)(this.required == true ? 1 : 0);
+            this.modelAttribute.upper = upperBound;
             this.modelAttribute.addTaggedValue("criticalDataElement", this.criticalDataElement?.ToString());
             this.modelAttribute.addTaggedValue("classification", this.classification);
             this.modelAttribute.addTaggedValue("logicalType", this.logicalType);
@@ -134,6 +149,8 @@ namespace EADataContract
             this.criticalDataElement = this.modelAttribute.getTaggedValue("criticalDataElement")?.booleanValue;
             this.classification = modelAttribute.getTaggedValue("classification")?.stringValue;
             this.logicalType = modelAttribute.getTaggedValue("logicalType")?.stringValue;
+            this.upperBound = (UnlimitedNatural)modelAttribute.upper;
+            this.isArray = this.upperBound.isUnlimited;
             this.examples = modelAttribute.getTaggedValue("examples")?.comment;
             this.primaryKeyPosition = modelAttribute.getTaggedValue("primaryKeyPosition")?.integerValue;
         }
@@ -180,7 +197,7 @@ namespace EADataContract
             this.addKeyValue("criticalDataElement", this.criticalDataElement);
             this.addKeyValue("classification", this.classification);
             this.addKeyValue("examples", this.examples);
-            this.addKeyValue("logicalType", this.logicalType);
+            
             if (this.children.OfType<ODCSLogicalTypeOptions>().FirstOrDefault() is ODCSLogicalTypeOptions options)
             {
                 this.addKeyValue("logicalTypeOptions", options.node);
@@ -195,8 +212,20 @@ namespace EADataContract
                     relationshipsSequenceNode.Add(relationship.node);
                 }
             }
-
-            
+            if(this.isArray)
+            {
+                this.addKeyValue("logicalType", "array");
+                this.addKeyValue("physicalType", "array");
+                var itemsNode = new YamlMappingNode();
+                this.addKeyValue("items", itemsNode);
+                this.addKeyValue("logicalType", this.logicalType, itemsNode);
+                this.addKeyValue("physicalType", this.physicalType, itemsNode);
+            }
+            else
+            {
+                this.addKeyValue("logicalType", this.logicalType);
+                this.addKeyValue("physicalType", this.physicalType);
+            }  
         }
     }
 

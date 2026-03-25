@@ -1,0 +1,168 @@
+<?xml  version='1.0' encoding='windows-1252' ?>
+<MDG.Technology version="1.0"><Documentation id="ODCS" name="Open Data Contract Specification (ODSC)" version="1.0" notes="Contains elements to model Open Data Contract Specifications (ODCS)" infoURI="https://bellekens.com" supportURI="https://bellekens.com"/><UMLProfiles><UMLProfile profiletype="uml2">
+	<Documentation id="FF80B8C1D8" name="ODCS" version="1.0" notes="ODCS"/>
+	<Content>
+		<Stereotypes>
+			<Stereotype name="ODCS_DataContract" metatype="Schema" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
+				<AppliesTo>
+					<Apply type="Package">
+						<Property name="_HideUmlLinks" value="True"/>
+						<Property name="URI" value=""/>
+					</Apply>
+				</AppliesTo>
+			</Stereotype>
+			<Stereotype name="ODCS_Element" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0" isAbstract="true">
+				<TaggedValues>
+					<Tag name="id" type="" description="" unit="" values="" default=""/>
+					<Tag name="businessName" type="" description="" unit="" values="" default=""/>
+					<Tag name="physicalName" type="" description="" unit="" values="" default=""/>
+					<Tag name="physicalType" type="" description="" unit="" values="" default=""/>
+					<Tag name="authoritativeDefinitions" type="Memo" description="" unit="" values="" default=""/>
+					<Tag name="tags" type="Memo" description="" unit="" values="" default=""/>
+					<Tag name="customProperties" type="Memo" description="" unit="" values="" default=""/>
+				</TaggedValues>
+			</Stereotype>
+			<Stereotype name="ODCS_LogicalType" metatype="Logical Type" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
+				<AppliesTo>
+					<Apply type="DataType">
+						<Property name="_HideUmlLinks" value="True"/>
+					</Apply>
+				</AppliesTo>
+				<TaggedValues>
+					<Tag name="type" type="enumeration" description="" unit="" values="string,date,number,integer,object,array,boolean" default="string"/>
+					<Tag name="maxItems" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="minItems" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="uniqueItems" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="format" type="" description="" unit="" values="" default=""/>
+					<Tag name="exclusiveMaximum" type="" description="" unit="" values="" default=""/>
+					<Tag name="exclusiveMinimum" type="" description="" unit="" values="" default=""/>
+					<Tag name="maximum" type="" description="" unit="" values="" default=""/>
+					<Tag name="minimum" type="" description="" unit="" values="" default=""/>
+					<Tag name="multipleOf" type="Decimal" description="" unit="" values="" default="TBD"/>
+					<Tag name="maxLength" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="minLength" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="pattern" type="" description="" unit="" values="" default=""/>
+					<Tag name="maxProperties" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="minProperties" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="required" type="Boolean" description="" unit="" values="True,False" default="False"/>
+				</TaggedValues>
+			</Stereotype>
+			<Stereotype name="ODCS_Object" metatype="Object" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0" generalizes="ODCS_Element" baseStereotypes="ODCS_Element">
+				<metaconstraints>
+					<metaconstraint umlRole="ownedAttribute" constraint="ODCS::ODCS_Property"/>
+				</metaconstraints>
+				<AppliesTo>
+					<Apply type="Class">
+						<Property name="_HideUmlLinks" value="True"/>
+						<Property name="isActive" value=""/>
+					</Apply>
+				</AppliesTo>
+				<TaggedValues>
+					<Tag name="dataGranularityDescription" type="" description="" unit="" values="" default=""/>
+				</TaggedValues>
+			</Stereotype>
+			<Stereotype name="ODCS_Property" metatype="Property" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0" generalizes="ODCS_Element" baseStereotypes="ODCS_Element">
+				<metaconstraints>
+					<metaconstraint umlRole="owner" constraint="ODCS::ODCS_Object"/>
+					<metaconstraint umlRole="type" constraint="ODCS::ODCS_LogicalType"/>
+				</metaconstraints>
+				<AppliesTo>
+					<Apply type="Attribute">
+						<Property name="_tagGroupings" value="exclusiveMaximum=Logical Type Options;exclusiveMinimum=Logical Type Options;format=Logical Type Options;maximum=Logical Type Options;maxItems=Logical Type Options;maxLength=Logical Type Options;maxProperties=Logical Type Options;minimum=Logical Type Options;minItems=Logical Type Options;minLength=Logical Type Options;minProperties=Logical Type Options;multipleOf=Logical Type Options;pattern=Logical Type Options;uniqueItems=Logical Type Options;timezone=Logical Type Options;defaultTimezone=Logical Type Options;required=Logical Type Options;"/>
+						<Property name="_tagGroups" value="Logical Type Options"/>
+						<Property name="_tagGroupStates" value="Logical Type Options=closed;"/>
+					</Apply>
+				</AppliesTo>
+				<TaggedValues>
+					<Tag name="primaryKeyPosition" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="logicalType" type="enumeration" description="" unit="" values="string,date,number,integer,object,array,boolean" default="string"/>
+					<Tag name="unique" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="partitioned" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="partitionKeyPosition" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="classification" type="" description="" unit="" values="" default=""/>
+					<Tag name="criticalDataElement" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="examples" type="Memo" description="" unit="" values="" default=""/>
+					<Tag name="required" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="defaultTimezone" type="" description="" unit="" values="" default=""/>
+					<Tag name="timezone" type="" description="" unit="" values="" default=""/>
+					<Tag name="maxItems" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="minItems" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="uniqueItems" type="Boolean" description="" unit="" values="True,False" default="False"/>
+					<Tag name="format" type="" description="" unit="" values="" default=""/>
+					<Tag name="exclusiveMaximum" type="" description="" unit="" values="" default=""/>
+					<Tag name="exclusiveMinimum" type="" description="" unit="" values="" default=""/>
+					<Tag name="maximum" type="" description="" unit="" values="" default=""/>
+					<Tag name="minimum" type="" description="" unit="" values="" default=""/>
+					<Tag name="multipleOf" type="Decimal" description="" unit="" values="" default="-1"/>
+					<Tag name="maxLength" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="minLength" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="pattern" type="" description="" unit="" values="" default=""/>
+					<Tag name="maxProperties" type="Integer" description="" unit="" values="" default="-1"/>
+					<Tag name="minProperties" type="Integer" description="" unit="" values="" default="-1"/>
+				</TaggedValues>
+			</Stereotype>
+			<Stereotype name="ODCS_Relationship" metatype="Relationship" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
+				<metaconstraints>
+					<metaconstraint umlRole="client" constraint="ODCS::ODCS_Object"/>
+					<metaconstraint umlRole="supplier" constraint="ODCS::ODCS_Object"/>
+				</metaconstraints>
+				<AppliesTo>
+					<Apply type="Association">
+						<Property name="_lineStyle" value="custom"/>
+						<Property name="_MeaningBackwards" value="Is Referenced by"/>
+						<Property name="_MeaningForwards" value="References"/>
+						<Property name="direction" value="Source -&gt; Destination"/>
+					</Apply>
+				</AppliesTo>
+			</Stereotype>
+		</Stereotypes>
+		<TaggedValueTypes>
+			<TaggedValueType property="Boolean" description="" notes="Type=Boolean;"/>
+			<TaggedValueType property="Decimal" description="" notes="Type=Decimal;"/>
+			<TaggedValueType property="Integer" description="" notes="Type=Integer;"/>
+			<TaggedValueType property="Memo" description="" notes="Type=Memo;"/>
+		</TaggedValueTypes>
+		<ViewDefinitions/>
+		<Metamodel/>
+	</Content>
+</UMLProfile></UMLProfiles><DiagramProfile><UMLProfile profiletype="uml2">
+	<Documentation id="FFA707967B" name="ODCS" version="1.0" notes="ODCS"/>
+	<Content>
+		<Stereotypes>
+			<Stereotype name="ODCS Diagram" notes="" cx="0" cy="0" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
+				<AppliesTo>
+					<Apply type="Diagram_Object">
+						<Property name="alias" value="ODCS"/>
+						<Property name="diagramID" value="ODCS"/>
+						<Property name="frameString" value="#DGMTYPE# #DGMNAME#"/>
+						<Property name="toolbox" value="ODCS"/>
+					</Apply>
+				</AppliesTo>
+			</Stereotype>
+		</Stereotypes>
+		<TaggedValueTypes/>
+		<ViewDefinitions/>
+		<Metamodel/>
+	</Content>
+</UMLProfile></DiagramProfile><UIToolboxes><UMLProfile profiletype="uml2">
+	<Documentation id="B3D0BB1BF2" name="ODCS" version="1.0" notes="ODCS"/>
+	<Content>
+		<Stereotypes>
+			<Stereotype name="ODCS elements" notes="" cx="265" cy="101" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="0">
+				<AppliesTo>
+					<Apply type="ToolboxPage"/>
+				</AppliesTo>
+				<TaggedValues>
+					<Tag name="ODCS::ODCS_DataContract(UML::Package)" type="" description="" unit="" values="" default="Data Contract"/>
+					<Tag name="ODCS::ODCS_Object(UML::Class)" type="" description="" unit="" values="" default="Object"/>
+					<Tag name="ODCS::ODCS_Property(UML::Attribute)" type="" description="" unit="" values="" default="Property"/>
+					<Tag name="UML::Enumeration" type="" description="" unit="" values="" default="Enumeration"/>
+					<Tag name="ODCS::ODCS_Relationship(UML::Association)" type="" description="" unit="" values="" default="Relationship"/>
+				</TaggedValues>
+			</Stereotype>
+		</Stereotypes>
+		<TaggedValueTypes/>
+		<ViewDefinitions/>
+		<Metamodel/>
+	</Content>
+</UMLProfile></UIToolboxes></MDG.Technology>

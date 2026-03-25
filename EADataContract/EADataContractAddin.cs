@@ -25,6 +25,15 @@ namespace EADataContract
                                 menuAbout
                               };
         }
+        /// <summary>
+        /// return the MDG content for the ODCS MDG (so it doesn't have to be loaded separately
+        /// </summary>
+        /// <param name="Repository"></param>
+        /// <returns>the MDG file contents</returns>
+        public override object EA_OnInitializeTechnologies(EA.Repository Repository)
+        {
+            return Properties.Resources.ODCS_MDG;
+        }
         public override void EA_MenuClick(EA.Repository Repository, string MenuLocation, string MenuName, string ItemName)
         {
             switch (ItemName)
@@ -36,7 +45,7 @@ namespace EADataContract
                     this.export();
                     break;
                 case menuAbout:
-                    //TODO: new AboutWindow().ShowDialog(this.model.mainEAWindow);
+                    new AboutWindow().ShowDialog(this.model.mainEAWindow);
                     break;
             }
         }

@@ -1265,6 +1265,79 @@
 							<RegistryValue Type="string" Value="EAJSON.EAJSONAddin" />
 						</RegistryKey>
 					</Component>
+					<Component Id="EADataContract_AddinFiles" Guid="DC18388D-04A0-41B7-BB3A-00B35E9ED6FA" UninstallWhenSuperseded="yes" Win64="$(var.Win64)">
+						<File Id="EADataContract.dll" KeyPath="yes" Source="..\EADataContract\bin\Debug\EADataContract.dll" />
+						<File Id="YamlDotNet.dll" Name="YamlDotNet.dll" Source="..\EADataContract\bin\Debug\YamlDotNet.dll" />
+						<Class Id="{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}" Context="InprocServer32" Description="EADataContract.ODCSQuality" ThreadingModel="both" ForeignServer="mscoree.dll">
+							<ProgId Id="EADataContract.ODCSQuality" Description="EADataContract.ODCSQuality" />
+						</Class>
+						<Class Id="{30089BAB-C5F3-3AA0-9758-E517E2EB335E}" Context="InprocServer32" Description="EADataContract.ODCSLogicalTypeOptions" ThreadingModel="both" ForeignServer="mscoree.dll">
+							<ProgId Id="EADataContract.ODCSLogicalTypeOptions" Description="EADataContract.ODCSLogicalTypeOptions" />
+						</Class>
+						<Class Id="{378347F7-70A0-3BBC-B260-943A6E3BCCB0}" Context="InprocServer32" Description="EADataContract.AboutWindow" ThreadingModel="both" ForeignServer="mscoree.dll">
+							<ProgId Id="EADataContract.AboutWindow" Description="EADataContract.AboutWindow" />
+						</Class>
+						<Class Id="{5B458096-FCF2-372E-AA78-6B59AA0F7513}" Context="InprocServer32" Description="EADataContract.ODCSLogicalType" ThreadingModel="both" ForeignServer="mscoree.dll">
+							<ProgId Id="EADataContract.ODCSLogicalType" Description="EADataContract.ODCSLogicalType" />
+						</Class>
+						<Class Id="{BCF8084C-C334-3481-856C-3192BC0402AE}" Context="InprocServer32" Description="EADataContract.EADataContractAddin" ThreadingModel="both" ForeignServer="mscoree.dll">
+							<ProgId Id="EADataContract.EADataContractAddin" Description="EADataContract.EADataContractAddin" />
+						</Class>
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32\3.5.21.21433" Name="Class" Value="EADataContract.ODCSQuality" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32\3.5.21.21433" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32\3.5.21.21433" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32\3.5.21.21433" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32" Name="Class" Value="EADataContract.ODCSQuality" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{29BE8262-5C1F-3E95-96AA-7615F7FC0D96}\InprocServer32" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32\3.5.21.21433" Name="Class" Value="EADataContract.ODCSLogicalTypeOptions" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32\3.5.21.21433" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32\3.5.21.21433" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32\3.5.21.21433" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32" Name="Class" Value="EADataContract.ODCSLogicalTypeOptions" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{30089BAB-C5F3-3AA0-9758-E517E2EB335E}\InprocServer32" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32\3.5.21.21433" Name="Class" Value="EADataContract.AboutWindow" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32\3.5.21.21433" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32\3.5.21.21433" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32\3.5.21.21433" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32" Name="Class" Value="EADataContract.AboutWindow" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{378347F7-70A0-3BBC-B260-943A6E3BCCB0}\InprocServer32" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32\3.5.21.21433" Name="Class" Value="EADataContract.ODCSLogicalType" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32\3.5.21.21433" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32\3.5.21.21433" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32\3.5.21.21433" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32" Name="Class" Value="EADataContract.ODCSLogicalType" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{5B458096-FCF2-372E-AA78-6B59AA0F7513}\InprocServer32" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}" Value="" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32\3.5.21.21433" Name="Class" Value="EADataContract.EADataContractAddin" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32\3.5.21.21433" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32\3.5.21.21433" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32\3.5.21.21433" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32" Name="Class" Value="EADataContract.EADataContractAddin" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="CLSID\{BCF8084C-C334-3481-856C-3192BC0402AE}\InprocServer32" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="Record\{976B258C-DCFF-3F90-87DF-CE274CCCEA4C}\3.5.21.21433" Name="Class" Value="EADataContract.ODCSLogicalTypeEnum" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="Record\{976B258C-DCFF-3F90-87DF-CE274CCCEA4C}\3.5.21.21433" Name="Assembly" Value="EADataContract, Version=3.5.21.21433, Culture=neutral, PublicKeyToken=null" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="Record\{976B258C-DCFF-3F90-87DF-CE274CCCEA4C}\3.5.21.21433" Name="RuntimeVersion" Value="v4.0.30319" Type="string" Action="write" />
+						<RegistryValue Root="HKCR" Key="Record\{976B258C-DCFF-3F90-87DF-CE274CCCEA4C}\3.5.21.21433" Name="CodeBase" Value="file:///[#EADataContract.dll]" Type="string" Action="write" />
+					</Component>
+					<Component Id="EADataContract_RegistryEntry" Guid="03167D77-FBB5-423E-8A65-8686B37E4639" UninstallWhenSuperseded="yes" Win64="$(var.Win64)">
+						<RegistryKey Root="HKLM" Key="$(var.EAAddinRegistryKey)EA Data Contract">
+							<RegistryValue Type="string" Value="EADataContract.EADataContractAddin" />
+						</RegistryKey>
+					</Component>
 					<Component Id="SAP2EAImporter_AddinFiles" Guid="D5EDA3D6-4F5F-4D00-A860-486D8D4A690D">
 						<File Id="SAP2EAImporter.dll" KeyPath="yes" Source="..\SAP2EAImporter\bin\Debug\SAP2EAImporter.dll" />
 						<Class Id="{63F6FB7A-F206-39AF-8CD5-69D061F83C88}" Context="InprocServer32" Description="SAP2EAImporter.SAP2EAImporterAddin" ThreadingModel="both" ForeignServer="mscoree.dll">

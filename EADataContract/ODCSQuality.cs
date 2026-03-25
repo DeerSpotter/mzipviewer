@@ -59,15 +59,32 @@ namespace EADataContract
         {
             if (attribute == null || enumValues == null || enumValues.Count == 0) return;
             //check if the attribute already has an enumeration type with the same values
+
             this.enumType = attribute.type as TSF_EA.Enumeration;
+            //check if the enumType contains the same values
+            if (this.enumType != null )
+            {
+                //return if the values are the same
+                if (this.enumType.ownedLiterals.Select(x => x.name).OrderBy(x => x)
+                    .SequenceEqual(enumValues.OrderBy(x => x)))
+                {
+                    return;
+                }
+                //check if this is used by any other attribute
+                if (this.enumType.getUsingAttributes().Count > 1)
+                {
+                    this.enumType = null; //force creation of a new enum
+                }
+            }
             if (this.enumType == null)
             {
                 var enumName = string.IsNullOrEmpty(this.id)
                                 ? attribute.name + "_Enum"
                                 : this.id;
-                //get existing enum
+                //get existing enum with the correct values
                 this.enumType = attribute.getOwner<Package>().ownedElementWrappers.OfType<TSF_EA.Enumeration>()
-                    .FirstOrDefault(e => e.name == enumName);
+                    .FirstOrDefault(e => e.name == enumName
+                                    && e.ownedLiterals.Select(x => x.name).OrderBy(x => x).SequenceEqual(enumValues.OrderBy(x=>x)));
                 //create new if neded
                 if (this.enumType == null)
                 {

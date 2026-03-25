@@ -85,6 +85,13 @@
 			<ComponentRef Id="EAJSON_AddinFiles"/>
 			<ComponentRef Id="EAJSON_RegistryEntry"/>
 		</Feature>
+		<Feature Id="EADataContract"
+				 Title="EA Data Contract"
+				 Description="Model, import and export ODCS Data Contracts"
+				 Level="1">
+			<ComponentRef Id="EADataContract_AddinFiles"/>
+			<ComponentRef Id="EADataContract_RegistryEntry"/>
+		</Feature>
 		<Feature Id="EABDTransformer"
 					 Title="EA Database Transformer"
 					 Description="Transform logical data models to database models"
