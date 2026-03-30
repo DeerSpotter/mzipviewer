@@ -27,7 +27,7 @@ namespace EAValidator
         {
             this.xdoc.Save(this.checkfile);
         }
-        public virtual string helpUrl
+        public override string helpUrl
         {
             get
             {
