@@ -285,7 +285,7 @@ namespace EAJSON
                 compositionList.Add(getPropertySchema(attribute));
             }
             //don't allow additional properties
-            schema.AllowAdditionalProperties = false;
+            //schema.AllowAdditionalProperties = false; //this causes problems when validating such a schema. The validation always returns invalid if there is an AllowAdditionalProperties = false, even if the additional properties are not used.
         }
 
         private void addRegularProperties(JSchema schema, TSF_EA.ElementWrapper element)
