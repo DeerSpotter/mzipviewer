@@ -247,16 +247,7 @@ namespace EAValidator
         protected abstract string checkName { get; }
         protected void loadXml()
         {
-            string schemaNamespace = "";
-            string schemaFileName = new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).DirectoryName + @"\Files\check.xsd";
-            if (!(Utils.FileOrDirectoryExists(schemaFileName)))
-            {
-                throw new FileNotFoundException("XSD schema not found: ", schemaFileName);
-            }
-            XmlSchemaSet schemas = new XmlSchemaSet();
-            schemas.Add(schemaNamespace, schemaFileName);
             this.xdoc = XDocument.Parse(this.xmlString);
-            xdoc.Validate(schemas, (o, e) => { throw new XmlSchemaValidationException($"Check {this.checkName} is invalid: {e.Message}"); });
         }
         public abstract void save();
         
