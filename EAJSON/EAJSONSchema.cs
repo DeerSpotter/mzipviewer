@@ -285,7 +285,7 @@ namespace EAJSON
                 compositionList.Add(getPropertySchema(attribute));
             }
             //don't allow additional properties
-            //schema.AllowAdditionalProperties = false; //this causes problems when validating such a schema. The validation always returns invalid if there is an AllowAdditionalProperties = false, even if the additional properties are not used.
+            //schema.AllowAdditionalProperties = true; //this causes problems when validating such a schema. The validation always returns invalid if there is an AllowAdditionalProperties = false, even if the additional properties are not used.
         }
 
         private void addRegularProperties(JSchema schema, TSF_EA.ElementWrapper element)
@@ -348,7 +348,7 @@ namespace EAJSON
             {
                 //add schema to definitions if of type object
                 typeSchema = this.addDefinition(attribute.type);
-                typeSchema.AllowAdditionalProperties = false;
+                //typeSchema.AllowAdditionalProperties = false;
             }
             else
             {
@@ -381,7 +381,7 @@ namespace EAJSON
             {
                 typeSchema.Type = JSchemaType.Object;
                 //set additional properties
-                typeSchema.AllowAdditionalProperties = false;
+                //typeSchema.AllowAdditionalProperties = false;
             }
             else if (type is UML.Classes.Kernel.Enumeration)
             {
