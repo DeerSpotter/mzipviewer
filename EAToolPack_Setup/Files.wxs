@@ -1359,9 +1359,6 @@
 						</RegistryKey>
 					</Component>
 					<Directory Id="Files" Name="Files">
-						<Component Id="EAValidator_ExtraFiles" Guid="29085904-c1d1-4348-b872-d7e42c472b27" DiskId="1" UninstallWhenSuperseded="yes" Win64="$(var.Win64)">
-							<File Id="check.xsd" Source="..\EAValidator\bin\Debug\Files\check.xsd" />
-						</Component>
 						<Directory Id="dirChecks" Name="Checks">
 
 						</Directory>
