@@ -146,6 +146,12 @@
     <Compile Include="AboutWindow.Designer.cs">
       <DependentUpon>AboutWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="CopyMappingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CopyMappingForm.Designer.cs">
+      <DependentUpon>CopyMappingForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="EAMappingAddin.cs" />
     <Compile Include="EAMappingSettings.cs" />
     <Compile Include="ImportMappingForm.cs">
@@ -213,6 +219,9 @@
     <EmbeddedResource Include="AboutWindow.resx">
       <DependentUpon>AboutWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="CopyMappingForm.resx">
+      <DependentUpon>CopyMappingForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ImportMappingForm.resx">
       <DependentUpon>ImportMappingForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -257,6 +266,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Files\Add_plus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Files\copy.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />

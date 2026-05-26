@@ -28,11 +28,11 @@ namespace EAMapping
             this.fromTextBox.Text = this.mapping != null && this.mapping.isReverseEmpty ?
                                     "<none>"
                                     : this._mapping?.source?.name;
-            this.toolTip.SetToolTip(this.fromTextBox, ((MappingNode)this._mapping?.source)?.getMappingPathExportString());
+            this.toolTip.SetToolTip(this.fromTextBox, ((MappingNode)this._mapping?.source)?.mappingPathExportString);
             this.toTextBox.Text = this.mapping != null && (this.mapping.isEmpty && ! this.mapping.isReverseEmpty) ? 
                                     "<none>" 
                                     : this._mapping?.target?.name;
-            this.toolTip.SetToolTip(this.toTextBox, ((MappingNode)this._mapping?.target)?.getMappingPathExportString());
+            this.toolTip.SetToolTip(this.toTextBox, ((MappingNode)this._mapping?.target)?.mappingPathExportString);
             if (this.mapping != null && this.mapping.mappingLogics.Any())
             {
                 //TODO, add controls for each mapping
@@ -94,6 +94,11 @@ namespace EAMapping
         {
             this.mappingDeleted?.Invoke(this, e);
         }
+        public event EventHandler mappingCopied;
+        private void copyButton_Click(object sender, EventArgs e)
+        {
+            this.mappingCopied?.Invoke(this, e);
+        }
         public event EventHandler mapping_Enter;
         private void MappingDetailsControl_Enter(object sender, EventArgs e)
         {
@@ -154,5 +159,7 @@ namespace EAMapping
             }
             this.enableDisable();
         }
+
+
     }
 }

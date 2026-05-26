@@ -39,6 +39,7 @@ namespace EAMapping
             var detailsControl = new MappingDetailsControl();
             detailsControl.mappingDeleted += this.mappingDeleted;
             detailsControl.mapping_Enter += this.mappingEnter;
+            detailsControl.mappingCopied += this.mappingCopied;
             detailsControl.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             detailsControl.BorderStyle = BorderStyle.FixedSingle;
             detailsControl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -46,6 +47,18 @@ namespace EAMapping
             detailsControl.Hide();
             this.mappingDetailControls.Add(detailsControl);
             this.mappingPanel.Controls.Add(detailsControl,0,i );
+        }
+        private void mappingCopied(object sender, EventArgs e)
+        {
+            var detailsControl = sender as MappingDetailsControl;
+            var mapping = detailsControl.mapping;
+            //show copy form to select the source nodes to copy this mapping to
+            var copyMappingForm = new CopyMappingForm();
+            copyMappingForm.initialize(mapping);
+            copyMappingForm.ShowDialog();
+            //reload the views to show the new mappings?
+            this.sourceTreeView.RefreshObject(this.sourceTreeView.Objects.Cast<MappingNode>().FirstOrDefault());
+            this.targetTreeView.RefreshObject(this.sourceTreeView.Objects.Cast<MappingNode>().FirstOrDefault());
         }
 
         private void mappingEnter(object sender, EventArgs e)
