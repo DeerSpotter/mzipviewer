@@ -2,9 +2,11 @@
 using EAAddinFramework.Mapping;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices.Expando;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using MP = MappingFramework;
@@ -554,6 +556,42 @@ namespace EAMapping
                 //reload the target to make sure all target nodes for the mappings are there
                 this.targetTreeView.RefreshObject(node.mappingSet.target);
             }
+        }
+
+ 
+        private void filterTreeView(TreeListView view, System.Windows.Forms.TextBox filterTextBox)
+        {
+            filterTextBox.BackColor = Color.White;
+            view.ModelFilter = new ModelFilter(delegate (object x)
+            {
+                if (string.IsNullOrEmpty(filterTextBox.Text))
+                {
+                    return true;
+                }
+                else
+                {
+                    var node = x as MappingNode;
+                    try
+                    {
+                        return Regex.IsMatch(node?.mappingPathExportString, $"^.*{filterTextBox.Text}.*$", RegexOptions.IgnoreCase);
+                    }
+                    catch (Exception)
+                    {
+                        filterTextBox.BackColor = Color.Red;
+                        return false;
+                    }
+                }
+            });
+        }
+        
+        private void targetFilterTextBox_TextChanged(object sender, EventArgs e)
+        {
+            filterTreeView(this.targetTreeView, this.targetFilterTextBox);
+        }
+
+        private void sourceFilterTextBox_TextChanged(object sender, EventArgs e)
+        {
+            filterTreeView(this.sourceTreeView, this.sourceFilterTextBox);
         }
     }
 }

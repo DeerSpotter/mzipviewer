@@ -42,17 +42,21 @@ namespace EAMapping
             this.mappingHotItemStyle = new BrightIdeasSoftware.HotItemStyle();
             this.mappingNodeImageList = new System.Windows.Forms.ImageList(this.components);
             this.leftSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.sourceFilterTextBox = new System.Windows.Forms.TextBox();
             this.sourceTreeView = new BrightIdeasSoftware.TreeListView();
             this.sourceColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.isMapped = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.sourceExpandColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.rightSplitContainer = new System.Windows.Forms.SplitContainer();
             this.mappingPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.targetFilterTextBox = new System.Windows.Forms.TextBox();
             this.targetTreeView = new BrightIdeasSoftware.TreeListView();
             this.targetColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.targetMappingsColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.targetExpandedColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.mainPanel = new System.Windows.Forms.Panel();
+            this.targetFilterLabel = new System.Windows.Forms.Label();
+            this.sourceFilterLabel = new System.Windows.Forms.Label();
             this.MappingContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.leftSplitContainer)).BeginInit();
             this.leftSplitContainer.Panel1.SuspendLayout();
@@ -142,6 +146,8 @@ namespace EAMapping
             // 
             // leftSplitContainer.Panel1
             // 
+            this.leftSplitContainer.Panel1.Controls.Add(this.sourceFilterLabel);
+            this.leftSplitContainer.Panel1.Controls.Add(this.sourceFilterTextBox);
             this.leftSplitContainer.Panel1.Controls.Add(this.sourceTreeView);
             // 
             // leftSplitContainer.Panel2
@@ -151,11 +157,24 @@ namespace EAMapping
             this.leftSplitContainer.SplitterDistance = 430;
             this.leftSplitContainer.TabIndex = 13;
             // 
+            // sourceFilterTextBox
+            // 
+            this.sourceFilterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.sourceFilterTextBox.Location = new System.Drawing.Point(69, 6);
+            this.sourceFilterTextBox.Name = "sourceFilterTextBox";
+            this.sourceFilterTextBox.Size = new System.Drawing.Size(358, 20);
+            this.sourceFilterTextBox.TabIndex = 1;
+            this.sourceFilterTextBox.TextChanged += new System.EventHandler(this.sourceFilterTextBox_TextChanged);
+            // 
             // sourceTreeView
             // 
             this.sourceTreeView.AllColumns.Add(this.sourceColumn);
             this.sourceTreeView.AllColumns.Add(this.isMapped);
             this.sourceTreeView.AllColumns.Add(this.sourceExpandColumn);
+            this.sourceTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.sourceTreeView.CellEditUseWholeCell = false;
             this.sourceTreeView.CheckedAspectName = "";
             this.sourceTreeView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -164,18 +183,17 @@ namespace EAMapping
             this.sourceExpandColumn});
             this.sourceTreeView.ContextMenuStrip = this.MappingContextMenu;
             this.sourceTreeView.Cursor = System.Windows.Forms.Cursors.Default;
-            this.sourceTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sourceTreeView.FullRowSelect = true;
             this.sourceTreeView.GridLines = true;
             this.sourceTreeView.HideSelection = false;
             this.sourceTreeView.HotItemStyle = this.mappingHotItemStyle;
             this.sourceTreeView.IsSimpleDragSource = true;
             this.sourceTreeView.IsSimpleDropSink = true;
-            this.sourceTreeView.Location = new System.Drawing.Point(0, 0);
+            this.sourceTreeView.Location = new System.Drawing.Point(0, 29);
             this.sourceTreeView.Name = "sourceTreeView";
             this.sourceTreeView.ShowGroups = false;
             this.sourceTreeView.ShowImagesOnSubItems = true;
-            this.sourceTreeView.Size = new System.Drawing.Size(430, 533);
+            this.sourceTreeView.Size = new System.Drawing.Size(430, 504);
             this.sourceTreeView.SmallImageList = this.mappingNodeImageList;
             this.sourceTreeView.TabIndex = 0;
             this.sourceTreeView.UseCellFormatEvents = true;
@@ -227,6 +245,8 @@ namespace EAMapping
             // 
             // rightSplitContainer.Panel2
             // 
+            this.rightSplitContainer.Panel2.Controls.Add(this.targetFilterLabel);
+            this.rightSplitContainer.Panel2.Controls.Add(this.targetFilterTextBox);
             this.rightSplitContainer.Panel2.Controls.Add(this.targetTreeView);
             this.rightSplitContainer.Size = new System.Drawing.Size(672, 533);
             this.rightSplitContainer.SplitterDistance = 265;
@@ -246,11 +266,24 @@ namespace EAMapping
             this.mappingPanel.Size = new System.Drawing.Size(265, 533);
             this.mappingPanel.TabIndex = 2;
             // 
+            // targetFilterTextBox
+            // 
+            this.targetFilterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.targetFilterTextBox.Location = new System.Drawing.Point(71, 6);
+            this.targetFilterTextBox.Name = "targetFilterTextBox";
+            this.targetFilterTextBox.Size = new System.Drawing.Size(329, 20);
+            this.targetFilterTextBox.TabIndex = 3;
+            this.targetFilterTextBox.TextChanged += new System.EventHandler(this.targetFilterTextBox_TextChanged);
+            // 
             // targetTreeView
             // 
             this.targetTreeView.AllColumns.Add(this.targetColumn);
             this.targetTreeView.AllColumns.Add(this.targetMappingsColumn);
             this.targetTreeView.AllColumns.Add(this.targetExpandedColumn);
+            this.targetTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.targetTreeView.CellEditUseWholeCell = false;
             this.targetTreeView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.targetColumn,
@@ -258,17 +291,16 @@ namespace EAMapping
             this.targetExpandedColumn});
             this.targetTreeView.ContextMenuStrip = this.MappingContextMenu;
             this.targetTreeView.Cursor = System.Windows.Forms.Cursors.Default;
-            this.targetTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.targetTreeView.FullRowSelect = true;
             this.targetTreeView.GridLines = true;
             this.targetTreeView.HideSelection = false;
             this.targetTreeView.HotItemStyle = this.mappingHotItemStyle;
             this.targetTreeView.IsSimpleDragSource = true;
             this.targetTreeView.IsSimpleDropSink = true;
-            this.targetTreeView.Location = new System.Drawing.Point(0, 0);
+            this.targetTreeView.Location = new System.Drawing.Point(0, 29);
             this.targetTreeView.Name = "targetTreeView";
             this.targetTreeView.ShowGroups = false;
-            this.targetTreeView.Size = new System.Drawing.Size(403, 533);
+            this.targetTreeView.Size = new System.Drawing.Size(403, 504);
             this.targetTreeView.SmallImageList = this.mappingNodeImageList;
             this.targetTreeView.TabIndex = 1;
             this.targetTreeView.UseCellFormatEvents = true;
@@ -319,6 +351,24 @@ namespace EAMapping
             this.mainPanel.Size = new System.Drawing.Size(1106, 533);
             this.mainPanel.TabIndex = 12;
             // 
+            // targetFilterLabel
+            // 
+            this.targetFilterLabel.AutoSize = true;
+            this.targetFilterLabel.Location = new System.Drawing.Point(3, 9);
+            this.targetFilterLabel.Name = "targetFilterLabel";
+            this.targetFilterLabel.Size = new System.Drawing.Size(60, 13);
+            this.targetFilterLabel.TabIndex = 4;
+            this.targetFilterLabel.Text = "Regex filter";
+            // 
+            // sourceFilterLabel
+            // 
+            this.sourceFilterLabel.AutoSize = true;
+            this.sourceFilterLabel.Location = new System.Drawing.Point(3, 9);
+            this.sourceFilterLabel.Name = "sourceFilterLabel";
+            this.sourceFilterLabel.Size = new System.Drawing.Size(60, 13);
+            this.sourceFilterLabel.TabIndex = 5;
+            this.sourceFilterLabel.Text = "Regex filter";
+            // 
             // MappingControlGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -329,12 +379,14 @@ namespace EAMapping
             this.Size = new System.Drawing.Size(1112, 568);
             this.MappingContextMenu.ResumeLayout(false);
             this.leftSplitContainer.Panel1.ResumeLayout(false);
+            this.leftSplitContainer.Panel1.PerformLayout();
             this.leftSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.leftSplitContainer)).EndInit();
             this.leftSplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.sourceTreeView)).EndInit();
             this.rightSplitContainer.Panel1.ResumeLayout(false);
             this.rightSplitContainer.Panel2.ResumeLayout(false);
+            this.rightSplitContainer.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rightSplitContainer)).EndInit();
             this.rightSplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.targetTreeView)).EndInit();
@@ -361,5 +413,9 @@ namespace EAMapping
         private BrightIdeasSoftware.OLVColumn targetMappingsColumn;
         private BrightIdeasSoftware.OLVColumn targetExpandedColumn;
         private System.Windows.Forms.ToolStripMenuItem newEmptyMappingToolStripMenuItem;
+        private System.Windows.Forms.TextBox sourceFilterTextBox;
+        private System.Windows.Forms.TextBox targetFilterTextBox;
+        private System.Windows.Forms.Label sourceFilterLabel;
+        private System.Windows.Forms.Label targetFilterLabel;
     }
 }
