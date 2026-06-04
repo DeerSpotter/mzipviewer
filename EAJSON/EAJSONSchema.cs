@@ -354,6 +354,33 @@ namespace EAJSON
             {
                 setSchemaType(attribute.type, typeSchema);
             }
+            if (!string.IsNullOrEmpty(attribute.defaultValue.ToString()))
+            {
+                var defaultValueToken = JToken.FromObject(attribute.defaultValue.ToString());
+                //get JToken, as string, or number depending on the type of the schema
+                if (typeSchema.Type == JSchemaType.Integer && attribute.defaultValue is LiteralInteger)
+                {
+                    defaultValueToken = JToken.FromObject(((LiteralInteger)attribute.defaultValue)._value);
+                }
+                else if (typeSchema.Type == JSchemaType.Number)
+                {
+                    //try to parse it as double, if it fails, keep it as string
+                    if (double.TryParse(attribute.defaultValue.ToString(), out double doubleValue))
+                    {
+                        defaultValueToken = JToken.FromObject(doubleValue);
+                    }
+                }
+                if (attribute.isUMLReadOnly)
+                {
+                    //add constant specification
+                    typeSchema.Const = defaultValueToken;
+                }
+                else
+                {
+                    //add default specification
+                    typeSchema.Default = defaultValueToken;
+                }
+            }
             //process facets on the attribute
             processFacets(attribute, typeSchema);
 
