@@ -51,15 +51,49 @@ namespace ECDMMessageComposer
         /// <summary>
         /// list of tagged value names to ignore when updating tagged values
         /// </summary>
-        public List<string> ignoredTaggedValues
+        public List<SBF.IgnoredTaggedValue> ignoredTaggedValues
         {
             get
             {
-                return this.getListValue("ignoredTaggedValues");
+                var returnList = new List<SBF.IgnoredTaggedValue>();
+                var ignoredTaggedValuesLists = this.getListValue("ignoredTaggedValues");
+                foreach (var row in ignoredTaggedValuesLists)
+                {
+                    //split the row by semicolon. it contains Name, default value, and dontCopy
+                    //if default value or dontcopy don't exists, we don't fill them in.
+                    var rowParts = row.Split(';');
+                    if (rowParts.Length > 0)
+                    {
+                        var ignoredTaggedValue = new IgnoredTaggedValue();
+                        ignoredTaggedValue.name = rowParts[0];
+                        if (rowParts.Length > 1)
+                        {
+                            ignoredTaggedValue.defaultValue = rowParts[1];
+                        }
+                        if (rowParts.Length > 2)
+                        {
+                            bool dontCopy;
+                            if (bool.TryParse(rowParts[2], out dontCopy))
+                            {
+                                ignoredTaggedValue.dontCopy = dontCopy;
+                            }
+                        }
+                        returnList.Add(ignoredTaggedValue);
+                    }
+                }
+                return returnList;
             }
             set
             {
-                this.setListValue("ignoredTaggedValues", value);
+                var rowList = new List<string>();
+                //loop the list of ignored tagged values and create a list of rows to save, each row containing the name, default value and dontcopy separated by semicolon
+                foreach (var ignoredTaggedValue in value)
+                {
+                    var row = ignoredTaggedValue.name + ";" + ignoredTaggedValue.defaultValue + ";" + ignoredTaggedValue.dontCopy;
+                    rowList.Add(row);
+                }
+                //save list of rows
+                this.setListValue("ignoredTaggedValues", rowList);
             }
         }
         /// <summary>
@@ -590,9 +624,15 @@ namespace ECDMMessageComposer
                 return this.copyAllGeneralizations;
             }
         }
+
     }
+    public class IgnoredTaggedValue : SBF.IgnoredTaggedValue
+    {
+        public string name { get; set; }
+        public string defaultValue { get; set; } = string.Empty;
+        public bool dontCopy { get; set; } = false;
+    }
+
 }
-
-
 
 

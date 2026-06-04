@@ -37,7 +37,7 @@ namespace ECDMMessageComposer
             // get the ignored stereotypes
             this.loadGridData(this.ignoredStereoTypesGrid, this.messageComposerSettings.ignoredStereotypes);
             //get the ignored tagged values
-            this.loadGridData(this.ignoredTaggedValuesGrid, this.messageComposerSettings.ignoredTaggedValues);
+            this.loadIgnoredTaggedValues(this.messageComposerSettings.ignoredTaggedValues);
             //get the ignored constraints
             this.loadGridData(this.ignoredConstraintsGrid, this.messageComposerSettings.ignoredConstraintTypes);
             //get the datatypes to copy
@@ -122,7 +122,7 @@ namespace ECDMMessageComposer
             //get the stereotypes from the grid
             this.messageComposerSettings.ignoredStereotypes = this.getListFromDataGrid(this.ignoredStereoTypesGrid);
             //get the tagged values from the grid
-            this.messageComposerSettings.ignoredTaggedValues = this.getListFromDataGrid(this.ignoredTaggedValuesGrid);
+            this.messageComposerSettings.ignoredTaggedValues = this.getIgnoredTaggedValuesFromGrid();
             //get the constraint types from the grid
             this.messageComposerSettings.ignoredConstraintTypes = this.getListFromDataGrid(this.ignoredConstraintsGrid);
             //get the datatypes from the grid
@@ -188,6 +188,33 @@ namespace ECDMMessageComposer
             {
                 datagrid.Rows.Add(rowvalue);
             }
+        }
+        private void loadIgnoredTaggedValues(List<SchemaBuilderFramework.IgnoredTaggedValue> ignoredTaggedValues)
+        {
+            this.ignoredTaggedValuesGrid.Rows.Clear();
+            foreach (var ignoredTaggedValue in ignoredTaggedValues)
+            {
+                var row = new DataGridViewRow();
+                row.Cells.Add(new DataGridViewTextBoxCell() { Value = ignoredTaggedValue.name });
+                row.Cells.Add(new DataGridViewTextBoxCell() { Value = ignoredTaggedValue.defaultValue });
+                row.Cells.Add(new DataGridViewCheckBoxCell() { Value = ignoredTaggedValue.dontCopy });
+                this.ignoredTaggedValuesGrid.Rows.Add(row);
+            }
+        }
+        private List<SchemaBuilderFramework.IgnoredTaggedValue> getIgnoredTaggedValuesFromGrid()
+        {
+            var returnedList = new List<SchemaBuilderFramework.IgnoredTaggedValue>();
+            foreach (DataGridViewRow row in this.ignoredTaggedValuesGrid.Rows)
+            {
+                string name = row.Cells[0].Value != null ? row.Cells[0].Value.ToString() : string.Empty;
+                string defaultValue = row.Cells[1].Value != null ? row.Cells[1].Value.ToString() : string.Empty;
+                bool dontCopy = row.Cells[2].Value != null ? (bool)row.Cells[2].Value : false;
+                if (name != string.Empty)
+                {
+                    returnedList.Add(new IgnoredTaggedValue() { name = name, defaultValue = defaultValue, dontCopy = dontCopy });
+                }
+            }
+            return returnedList;
         }
         private List<string> getListFromDataGrid(DataGridView datagrid)
         {
