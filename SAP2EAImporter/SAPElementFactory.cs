@@ -72,6 +72,11 @@ namespace SAP2EAImporter
             {
                 return new SAPDatatype(elementWrapper as UMLEA.DataType);
             }
+            if (string.IsNullOrEmpty(stereotype)
+                && elementWrapper is UMLEA.Interface)
+            {
+                return new SAPInterface(elementWrapper as UMLEA.Interface);
+            }
             if (stereotype == SAPTable.stereotype)
             {
                 return new SAPTable(elementWrapper as UMLEA.Class);
