@@ -36,6 +36,7 @@ namespace EADataContract
             } 
             protected set { _node = value; } 
         }
+        protected List<string> keyOrder { get; set; } = null;
         protected abstract void loadYamlNode();
         public List<ODCSItem> children { get; set; } = new List<ODCSItem>();
         public List<ODCSRelationship> relationships { get; } = new List<ODCSRelationship>();
@@ -198,9 +199,30 @@ namespace EADataContract
 
         public string getYamlString()
         {
-
+            this.reorderKeys();
             return new SerializerBuilder()
                 .Build().Serialize(this.node).Trim();
+        }
+        private int getKeyOrderIndex(string key)
+        {
+            if (this.keyOrder == null) return int.MaxValue; //if no key order is defined, return max value to keep original order
+            var wildCardIndex = this.keyOrder.Contains("*") ? this.keyOrder.IndexOf("*") : int.MaxValue;
+            return this.keyOrder.Contains(key) ? this.keyOrder.IndexOf(key) : wildCardIndex;
+        }   
+        protected void reorderKeys()
+        {
+            if (this.keyOrder == null) return;//dont do anything if the keyorder is not defined
+            if (this.node is YamlMappingNode mappingNode)
+            {
+                // Create a new ordered list
+                var orderedChildren = mappingNode.Children.OrderBy(x => this.getKeyOrderIndex((x.Key as YamlScalarNode)?.Value)).ToList();
+                // Clear the existing children and add them back in the new order
+                mappingNode.Children.Clear();
+                foreach (var kvp in orderedChildren)
+                {
+                    mappingNode.Add(kvp.Key, kvp.Value);
+                }
+            }
         }
         protected string getStringValue(string key)
         {
@@ -278,14 +300,19 @@ namespace EADataContract
             if (string.IsNullOrEmpty(contents)) return null;
             var input = new StringReader(contents);
             var yaml = new YamlStream();
-            yaml.Load(input);
             YamlNode node = null;
-            if (yaml.Documents.Count > 0)
+            try
             {
-                //get the parsed node
-                node = yaml.Documents[0].RootNode;
+                yaml.Load(input);
+
+                if (yaml.Documents.Count > 0)
+                {
+                    //get the parsed node
+                    node = yaml.Documents[0].RootNode;
+                }
             }
-            else
+            catch (Exception) { }//do nothing if this fails, we will just create a scalar node with the string contents
+            if (node == null)
             {
                 //make a new scalar node
                 node = new YamlScalarNode(contents);

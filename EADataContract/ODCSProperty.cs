@@ -152,7 +152,9 @@ namespace EADataContract
             this.upperBound = (UnlimitedNatural)modelAttribute.upper;
             this.isArray = this.upperBound.isUnlimited;
             this.examples = modelAttribute.getTaggedValue("examples")?.comment;
-            this.primaryKeyPosition = modelAttribute.getTaggedValue("primaryKeyPosition")?.integerValue;
+            //default value for primaryKeyPosition is -1, which we convert to null in that case.
+            var primaryKeyPositionValue = modelAttribute.getTaggedValue("primaryKeyPosition")?.integerValue;
+            this.primaryKeyPosition = primaryKeyPositionValue == -1 ? null : primaryKeyPositionValue;
         }
 
         protected override void getChildrenFromModel()

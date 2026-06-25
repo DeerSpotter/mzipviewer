@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TSF.UmlToolingFramework.Wrappers.EA;
+using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
 
 namespace EADataContract
@@ -15,10 +16,12 @@ namespace EADataContract
     public class ODCSDataContract : ODCSItem
     {
         public static string stereotype => profile + "ODCS_DataContract";
+        private static List<string> contractKeyOrder = new List<string>(new string[] { "name", "id", "version", "description","*", "schema" });   
         private YamlMappingNode root => this.node as YamlMappingNode;
         private Package modelPackage => this.modelElement as Package;
         public ODCSDataContract(string filePath, YamlMappingNode node) : base(node, null)
         {
+            this.keyOrder = contractKeyOrder;
             this.filePath = filePath;
             this.name = getStringValue("name");
             this.version = getStringValue("version");
@@ -29,19 +32,30 @@ namespace EADataContract
                 this.schema = new ODCSSchema(schemaNode, this);
             }
         }
-        public void saveToFile(string filePath)
+        public void saveToFile(ODCSDataContract existingContract)
         {
-            var yamlString = this.getYamlString();
-            File.WriteAllText(filePath, yamlString);
+            //update the name and version and description of the datacontract with the current values
+            //replace the schema by this schema
+            //then print it to the file
+
+            existingContract.addKeyValue("name", this.name);
+            existingContract.addKeyValue("version", this.version);
+            existingContract.addKeyValue("description", this.description);
+            existingContract.addKeyValue("id", this.id);
+            existingContract.addKeyValue("schema", this.schema.node);
+
+            //actually write the file
+            File.WriteAllText(existingContract.filePath, existingContract.getYamlString());
         }
         public ODCSDataContract(Package package) : base(package)
         {
             this.loadFromModel();
+            this.keyOrder = contractKeyOrder;
         }
         public void importContract(Package package)
         {
             this.importToModel(package, 0);
-            EAOutputLogger.log("Importing Relationships" , 0, LogTypeEnum.log);
+            EAOutputLogger.log("Importing Relationships", 0, LogTypeEnum.log);
             this.importRelationships(0);
             //do the cleanup
             EAOutputLogger.log("Cleanup...", 0, LogTypeEnum.log);
@@ -50,6 +64,7 @@ namespace EADataContract
         public string filePath { get; set; }
         public string name { get; set; }
         public string version { get; set; }
+        public string description { get; set; }
 
         public ODCSSchema schema { get; set; }
 
@@ -57,7 +72,14 @@ namespace EADataContract
         {
             var yamlText = File.ReadAllText(filePath);
             var yaml = new YamlStream();
-            yaml.Load(new StringReader(yamlText));
+            try
+            {
+                yaml.Load(new StringReader(yamlText));
+            }
+            catch (SemanticErrorException ex)
+            {
+                throw new InvalidDataException($"Error parsing YAML file '{filePath}' at line {ex.Start.Line}: {ex.Message}");
+            }
             //check if there is a root node. If not, create an empty one
             if (yaml.Documents.Count == 0 || yaml.Documents[0].RootNode == null)
             {
@@ -86,7 +108,7 @@ namespace EADataContract
                     filePath = saveFileDialog.FileName;
                     //if the file doesn't exist, create it
                     if (!File.Exists(filePath))
-                    { 
+                    {
                         File.Create(filePath).Close();
                     }
                 }
@@ -127,7 +149,7 @@ namespace EADataContract
             //look for package with correct name and stereotype under context package
             var existingPackage = contextPackage.getNestedPackageTree(true)
                                    .OfType<Package>()
-                                   .FirstOrDefault(x => x.name == this.name 
+                                   .FirstOrDefault(x => x.name == this.name
                                                     && x.fqStereotype == stereotype);
             if (existingPackage != null)
             {
@@ -147,6 +169,7 @@ namespace EADataContract
         {
             this.modelPackage.name = this.name;
             this.modelPackage.version = this.version;
+            this.modelPackage.notes = this.description;
             this.modelPackage.addTaggedValue("id", this.id);
             this.modelPackage.save();
         }
@@ -160,6 +183,7 @@ namespace EADataContract
         {
             this.name = this.modelPackage.name;
             this.version = this.modelPackage.version;
+            this.description = this.modelPackage.notes;
         }
 
         protected override void getChildrenFromModel()
@@ -172,8 +196,9 @@ namespace EADataContract
         {
             this.node = new YamlMappingNode();
             this.addKeyValue("name", this.name);
-            this.addKeyValue("version", this.version);
             this.addKeyValue("id", this.id);
+            this.addKeyValue("version", this.version);
+            this.addKeyValue("description", this.description);
             this.addKeyValue("schema", this.schema.node);
         }
         protected void cleanUp()
@@ -186,9 +211,9 @@ namespace EADataContract
                 //skip enum if it was already deleted
                 if (deletedEnumIds.Contains(enumeration.uniqueID)) continue;
                 //find identical enums
-                var identicalEnumerations = enumerations.Where( x => x.name == enumeration.name 
+                var identicalEnumerations = enumerations.Where(x => x.name == enumeration.name
                                                                 && x.id != enumeration.id
-                                                                && x.ownedLiterals.Select(y => y.name).OrderBy(y => y).SequenceEqual(enumeration.ownedLiterals.Select(y => y.name).OrderBy(y => y)) );
+                                                                && x.ownedLiterals.Select(y => y.name).OrderBy(y => y).SequenceEqual(enumeration.ownedLiterals.Select(y => y.name).OrderBy(y => y)));
                 foreach (var identicalEnumeration in identicalEnumerations)
                 {
                     EAOutputLogger.log($"Merging enumeration '{identicalEnumeration.name}'", 0, LogTypeEnum.log);

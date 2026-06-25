@@ -110,7 +110,7 @@ namespace EADataContract
                            , 0
                            , LogTypeEnum.log);
             var contract = new ODCSDataContract(selectedPackage);
-            contract.saveToFile(fileName);
+            contract.saveToFile(userSelectedContract);
             EAOutputLogger.log(this.model, outputName
                            , $"Finished export of package '{selectedPackage.name}' to file '{fileName}'"
                            , 0
