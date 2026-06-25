@@ -10,9 +10,10 @@ using UMLEA = TSF.UmlToolingFramework.Wrappers.EA;
 
 namespace SAP2EAImporter
 {
-    class BOPFBusinessObject: SAPElement<UMLEA.Component>, BOPFNodeOwner
+    class BOPFBusinessObject : SAPElement<UMLEA.Component>, BOPFNodeOwner
     {
         public static string stereotype => "BOPF_businessObject";
+        const string outputName = "SAP2EAImporter"; //TODO move to settings
 
         public BOPFBusinessObject(string name, UML.Classes.Kernel.Package package, string key)
             : base(name, package, stereotype, key, true, true) { }
@@ -31,7 +32,18 @@ namespace SAP2EAImporter
         {
             return new BOPFNode(name, this, key, true);
         }
-        const string outputName = "SAP2EAImporter"; //TODO move to settings
+        const string constInterfaceName = "Constants Interface";
+        public SAPInterface constInterface
+        {
+            get
+            {
+                var linkProperty = this.getLinkProperty<Interface>(constInterfaceName);
+                return linkProperty != null
+                        ? new SAPInterface(linkProperty)
+                        : null;
+            }
+            set => this.setLinkProperty(constInterfaceName, value.wrappedElement);
+        }
         public override void formatDiagrams()
         {
             EAOutputLogger.log(this.wrappedElement.EAModel, outputName

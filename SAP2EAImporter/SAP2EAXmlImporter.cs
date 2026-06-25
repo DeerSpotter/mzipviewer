@@ -25,6 +25,7 @@ namespace SAP2EAImporter
         const string SapClass = "CLAS";
         const string SapTable = "TABL";
         const string SapView = "VIEW";
+        const string SapInterface = "INTF";
         const string outputName = "SAP2EAImporter"; //TODO move to settings
         private XDocument xDoc { get; set; }
         private UMLEA.Model model { get; set; }
@@ -32,7 +33,6 @@ namespace SAP2EAImporter
         private Dictionary<string, SAPAuthorizationObject> authorizationOjects;
         private Dictionary<string, RolePackage> rolePackages;
         private Dictionary<string, FunctionModule> functionModules;
-        private Dictionary<string, UserCategory> userCategories;
 
         public void import(UML.Classes.Kernel.Package selectedPackage)
         {
@@ -41,7 +41,6 @@ namespace SAP2EAImporter
             this.authorizationOjects = new Dictionary<string, SAPAuthorizationObject>();
             this.rolePackages = new Dictionary<string, RolePackage>();
             this.functionModules = new Dictionary<string, FunctionModule>();
-            this.userCategories = new Dictionary<string, UserCategory>();
             if (selectedPackage == null) return;
             this.model = (UMLEA.Model)selectedPackage.model;
             EAOutputLogger.clearLog(this.model, outputName);
@@ -219,9 +218,6 @@ namespace SAP2EAImporter
                 case SapFunctionModule:
                     processFunctionModule(elementNode, package);
                     break;
-                case SapUsercategory:
-                    processUserCategories(elementNode, package);
-                    break;
                 case SapBopf:
                     processBopf(elementNode, package);
                     break;
@@ -233,6 +229,9 @@ namespace SAP2EAImporter
                     break;
                 case SapView:
                     processView(elementNode, package);
+                    break;
+                case SapInterface:
+                    processInterface(elementNode, package);
                     break;
             }
 
@@ -279,6 +278,22 @@ namespace SAP2EAImporter
             this.processOperations<UMLEA.Class>(elementNode, sapClass);
             return sapClass;
 
+        }
+        private SAPInterface processInterface(XElement elementNode, UML.Classes.Kernel.Package package)
+        {
+            var elementName = elementNode.Attribute("name").Value;
+            var sapInterface = new SAPInterface(elementName, package);
+            // Import notes
+            var notesNode = elementNode.Elements("notes").FirstOrDefault();
+            if (notesNode != null)
+            {
+                sapInterface.notes = notesNode.Value;
+            }
+            sapInterface.save();
+            //process attributes
+            this.processAttributes<UMLEA.Interface>(elementNode, sapInterface);
+            this.processOperations<UMLEA.Interface>(elementNode, sapInterface);
+            return sapInterface;
         }
         private void processOperations<T>(XElement elementNode, SAPElement<T> owner) where T : UMLEA.ElementWrapper
         {
@@ -359,6 +374,13 @@ namespace SAP2EAImporter
             //{
             //    businessObject.hasAuthorizationCheck = hasAuthCheckNode.Value.Equals("True", StringComparison.InvariantCultureIgnoreCase)
             //}
+
+            //const_interface
+            var constInterfaceName = elementNode.Elements("const_interface").FirstOrDefault()?.Value;
+            if (!string.IsNullOrEmpty(constInterfaceName))
+            {
+                businessObject.constInterface = new SAPInterface(constInterfaceName, businessObject.elementWrapper.owningPackage);
+            }
 
             //TODO: other properties
 
@@ -926,6 +948,12 @@ namespace SAP2EAImporter
         {
             //<element name="ZS_RANOREX" type="RP">
             //	<notes/>
+            //<roles>
+			//	<role name="Y1CFAIN1__"/>
+			//	<role name="Y1CFAINWD_"/>
+			//	<role name="ZR_0358"/>
+			//	<role name="Y1CFAINWD_"/>
+			//</roles>
             //	<assignment>
             //		<orgunit name="50375977"/>
             //		<orgunit name="50509797"/>
@@ -945,37 +973,14 @@ namespace SAP2EAImporter
             }
             //save rolePackage
             rolePackage.save();
-            //process the orgunit nodes as User Categories
-            foreach (var userCategoryNode in elementNode.Element("assignment")?.Elements("orgunit") ?? Array.Empty<XElement>())
+
+            //process the role nodes as either singleRoles or composite roles
+            foreach (var roleNode in elementNode.Element("roles")?.Elements("role") ?? Array.Empty<XElement>())
             {
-                var userCategoryName = userCategoryNode.Attribute("name").Value;
-
-                // Get the userCategory with tthis name
-                UserCategory userCategory;
-                if (this.userCategories.TryGetValue(userCategoryName, out userCategory))
-                {
-                    // Create a relation between the RolePakcage and the user category
-                    userCategory.addRolePackage(rolePackage);
-                }
-
+                var roleName = roleNode.Attribute("name").Value;
+                // Get the singleRole or compositeRole with this name from the model
+                rolePackage.addRole(roleName);                
             }
-        }
-
-        private void processUserCategories(XElement elementNode, UML.Classes.Kernel.Package package)
-        {
-            //<package name="User Categories">
-            //	<element name="Dienst Administratieve Toepassingen voor Algemeen Beheer" type="ORGUNIT">
-            //	</element>
-            //</package>
-            //get the orgunit nodes and create for each of them a user category that can be linked to this role package.
-            var elementName = elementNode.Attribute("name").Value;
-            var userCategory = new UserCategory(elementName, package);
-
-            //add to dictionary
-            this.userCategories.Add(userCategory.name, userCategory);
-
-            //save functionModule
-            userCategory.save();
         }
 
         private void processFunctionModule(XElement elementNode, UML.Classes.Kernel.Package package)
