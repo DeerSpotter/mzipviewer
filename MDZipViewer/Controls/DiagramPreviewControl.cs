@@ -31,7 +31,6 @@ public sealed class DiagramPreviewControl : UserControl
     {
         Dock = DockStyle.Fill;
         _diagramSelector.SelectedIndexChanged += (_, _) => ShowSelectedDiagram();
-
         Controls.Add(_canvas);
         Controls.Add(_status);
         Controls.Add(_diagramSelector);
@@ -86,10 +85,7 @@ public sealed class DiagramPreviewControl : UserControl
             return byOwner;
 
         var sameDocument = elements.Where(e => e.Document == diagram.Document).ToList();
-        if (sameDocument.Count > 0)
-            return sameDocument;
-
-        return elements;
+        return sameDocument.Count > 0 ? sameDocument : elements;
     }
 
     private sealed class PreviewCanvas : Panel
@@ -104,9 +100,7 @@ public sealed class DiagramPreviewControl : UserControl
             ResizeRedraw = true;
         }
 
-        public void SetGraph(
-            IReadOnlyList<ModelElement> nodes,
-            IReadOnlyList<ModelRelationship> relationships)
+        public void SetGraph(IReadOnlyList<ModelElement> nodes, IReadOnlyList<ModelRelationship> relationships)
         {
             _nodes = nodes;
             _relationships = relationships;
@@ -117,7 +111,6 @@ public sealed class DiagramPreviewControl : UserControl
         private void BuildLayout()
         {
             _bounds.Clear();
-
             const int nodeWidth = 190;
             const int nodeHeight = 72;
             const int horizontalGap = 70;
@@ -146,10 +139,7 @@ public sealed class DiagramPreviewControl : UserControl
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.TranslateTransform(AutoScrollPosition.X, AutoScrollPosition.Y);
 
-            using var edgePen = new Pen(Color.DimGray, 1.4f)
-            {
-                CustomEndCap = new AdjustableArrowCap(4, 5)
-            };
+            using var edgePen = new Pen(Color.DimGray, 1.4f);
             using var edgeTextBrush = new SolidBrush(Color.FromArgb(70, 70, 70));
             using var edgeFont = new Font(Font.FontFamily, 7.5f);
 
@@ -163,6 +153,7 @@ public sealed class DiagramPreviewControl : UserControl
                 var start = Center(source);
                 var end = Center(target);
                 e.Graphics.DrawLine(edgePen, start, end);
+                DrawArrowHead(e.Graphics, edgePen.Color, start, end);
 
                 var label = relationship.Name == "(unnamed)" ? relationship.Type : relationship.Name;
                 var midpoint = new Point((start.X + end.X) / 2, (start.Y + end.Y) / 2);
@@ -183,12 +174,26 @@ public sealed class DiagramPreviewControl : UserControl
 
                 e.Graphics.FillRectangle(fillBrush, bounds);
                 e.Graphics.DrawRectangle(borderPen, bounds);
-
                 var titleArea = new Rectangle(bounds.X + 8, bounds.Y + 8, bounds.Width - 16, 34);
                 var typeArea = new Rectangle(bounds.X + 8, bounds.Bottom - 25, bounds.Width - 16, 18);
                 e.Graphics.DrawString(node.Name, titleFont, titleBrush, titleArea);
                 e.Graphics.DrawString(node.Type, typeFont, typeBrush, typeArea);
             }
+        }
+
+        private static void DrawArrowHead(Graphics graphics, Color color, Point start, Point end)
+        {
+            var angle = Math.Atan2(end.Y - start.Y, end.X - start.X);
+            const double spread = Math.PI / 7;
+            const int length = 10;
+            var p1 = new Point(
+                end.X - (int)(length * Math.Cos(angle - spread)),
+                end.Y - (int)(length * Math.Sin(angle - spread)));
+            var p2 = new Point(
+                end.X - (int)(length * Math.Cos(angle + spread)),
+                end.Y - (int)(length * Math.Sin(angle + spread)));
+            using var brush = new SolidBrush(color);
+            graphics.FillPolygon(brush, [end, p1, p2]);
         }
 
         private static Point Center(Rectangle rectangle) =>
