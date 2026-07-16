@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.IO.Compression;
+using System.Xml;
 using System.Xml.Linq;
 using MDZipViewer.Model;
 
@@ -45,7 +46,7 @@ public sealed class PortedMagicDrawParser
             using var stream = entry.Open();
             document = XDocument.Load(stream, LoadOptions.PreserveWhitespace);
         }
-        catch (Exception ex) when (ex is System.Xml.XmlException or InvalidDataException)
+        catch (Exception ex) when (ex is XmlException or InvalidDataException)
         {
             inventory.Diagnostics.Add(new("Error", "Model", ex.Message, entry.FullName));
             return;
@@ -58,7 +59,9 @@ public sealed class PortedMagicDrawParser
         inventory.Documents.Add(new ModelDocument(
             entry.FullName,
             root.Name.LocalName,
-            Descendants(root, "Documentation").Select(e => Attr(e, "exporterVersion")).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v))));
+            Descendants(root, "Documentation")
+                .Select(e => Attr(e, "exporterVersion"))
+                .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v))));
 
         ParseElements(root, entry.FullName, inventory);
         ParseConstraints(root, entry.FullName, inventory);
@@ -75,20 +78,19 @@ public sealed class PortedMagicDrawParser
             if (string.IsNullOrWhiteSpace(id))
                 continue;
 
-            var rawType = Attr(element, "type") ?? element.Name.LocalName;
-            var type = NormalizeType(rawType);
+            var type = NormalizeType(Attr(element, "type") ?? element.Name.LocalName);
             var name = Attr(element, "name") ?? "(unnamed)";
             var ownerId = Attr(element.Parent, "id");
             var humanType = Attr(element, "humanType");
 
-            inventory.Elements.Add(new(id, name, type, documentName, ownerId, humanType));
+            if (!inventory.Elements.Any(e => e.Id.Equals(id, StringComparison.Ordinal)))
+                inventory.Elements.Add(new(id, name, type, documentName, ownerId, humanType));
 
             if (!MdzipTypeClassifier.IsRelationship(type))
                 continue;
 
             var source = FirstReference(element, "source", "client", "specific", "informationSource", "end1", "from");
             var target = FirstReference(element, "target", "supplier", "general", "informationTarget", "end2", "to");
-
             if (source is null || target is null)
             {
                 var memberEnds = References(Attr(element, "memberEnd")).Take(2).ToArray();
@@ -99,7 +101,8 @@ public sealed class PortedMagicDrawParser
                 }
             }
 
-            inventory.Relationships.Add(new(id, name, type, documentName, ownerId, source, target));
+            if (!inventory.Relationships.Any(r => r.Id.Equals(id, StringComparison.Ordinal)))
+                inventory.Relationships.Add(new(id, name, type, documentName, ownerId, source, target));
         }
     }
 
@@ -107,19 +110,13 @@ public sealed class PortedMagicDrawParser
     {
         foreach (var rule in Descendants(root, "ownedRule"))
         {
-            var owner = rule.Parent;
-            var ownerId = Attr(owner, "id");
-            if (string.IsNullOrWhiteSpace(ownerId))
-                continue;
-
+            var ownerId = Attr(rule.Parent, "id");
             var name = Attr(rule, "name");
             var specification = rule.Elements().FirstOrDefault(e => Local(e) == "specification");
             var body = specification?.Elements().FirstOrDefault(e => Local(e) == "body")?.Value;
-            var language = specification?.Elements().FirstOrDefault(e => Local(e) == "language")?.Value;
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(body))
-                continue;
-
-            inventory.Constraints.Add(new(ownerId, name, body.Replace("\n", Environment.NewLine), language ?? string.Empty, documentName));
+            var language = specification?.Elements().FirstOrDefault(e => Local(e) == "language")?.Value ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(ownerId) && !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(body))
+                inventory.Constraints.Add(new(ownerId, name, body.Replace("\n", Environment.NewLine), language, documentName));
         }
     }
 
@@ -127,19 +124,18 @@ public sealed class PortedMagicDrawParser
     {
         var ownedAttributes = Descendants(root, "ownedAttribute")
             .Where(e => !string.IsNullOrWhiteSpace(Attr(e, "id")))
-            .ToDictionary(e => Attr(e, "id")!, StringComparer.Ordinal);
+            .GroupBy(e => Attr(e, "id")!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
 
         foreach (var lifeline in Descendants(root, "lifeline"))
         {
             var id = Attr(lifeline, "id");
             if (string.IsNullOrWhiteSpace(id))
                 continue;
-
             var represents = Attr(lifeline, "represents");
             string? representedType = null;
             if (represents is not null && ownedAttributes.TryGetValue(represents, out var property))
-                representedType = Attr(property, "type") ?? FirstReference(property, "type");
-
+                representedType = NormalizeReference(Attr(property, "type")) ?? FirstReference(property, "type");
             inventory.Lifelines.Add(new(id, represents, representedType, documentName));
         }
     }
@@ -148,28 +144,31 @@ public sealed class PortedMagicDrawParser
     {
         var fragments = Descendants(root, "fragment")
             .Where(e => !string.IsNullOrWhiteSpace(Attr(e, "id")))
-            .ToDictionary(e => Attr(e, "id")!, StringComparer.Ordinal);
+            .GroupBy(e => Attr(e, "id")!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
 
         foreach (var message in Descendants(root, "message"))
         {
             var id = Attr(message, "id");
             if (string.IsNullOrWhiteSpace(id))
                 continue;
-
             var sendEvent = Attr(message, "sendEvent");
             var receiveEvent = Attr(message, "receiveEvent");
-            var source = CoveredLifeline(fragments, sendEvent);
-            var target = CoveredLifeline(fragments, receiveEvent);
-            inventory.Messages.Add(new(id, Attr(message, "name") ?? "(unnamed)", source, target, sendEvent, receiveEvent, documentName));
+            inventory.Messages.Add(new(
+                id,
+                Attr(message, "name") ?? "(unnamed)",
+                CoveredLifeline(fragments, sendEvent),
+                CoveredLifeline(fragments, receiveEvent),
+                sendEvent,
+                receiveEvent,
+                documentName));
         }
     }
 
-    private static string? CoveredLifeline(IReadOnlyDictionary<string, XElement> fragments, string? occurrenceId)
-    {
-        if (occurrenceId is null || !fragments.TryGetValue(occurrenceId, out var occurrence))
-            return null;
-        return FirstReference(occurrence, "covered");
-    }
+    private static string? CoveredLifeline(IReadOnlyDictionary<string, XElement> fragments, string? occurrenceId) =>
+        occurrenceId is not null && fragments.TryGetValue(occurrenceId, out var occurrence)
+            ? FirstReference(occurrence, "covered")
+            : null;
 
     private static void ParseOwnedDiagrams(ZipArchive archive, XElement root, string documentName, MdzipInventory inventory)
     {
@@ -180,27 +179,27 @@ public sealed class PortedMagicDrawParser
             var streamContentId = Descendants(ownedDiagram, "binaryObject")
                 .Select(e => Attr(e, "streamContentID"))
                 .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
-
             var diagramId = !string.IsNullOrWhiteSpace(owner)
                 ? owner + "\u0003" + name
                 : Attr(ownedDiagram, "id") ?? "diagram-" + inventory.Diagrams.Count;
 
-            inventory.Diagrams.Add(new(diagramId, name, "Diagram", documentName, owner, streamContentId));
+            if (!inventory.Diagrams.Any(d => d.Id.Equals(diagramId, StringComparison.Ordinal)))
+                inventory.Diagrams.Add(new(diagramId, name, "Diagram", documentName, owner, streamContentId));
 
             if (string.IsNullOrWhiteSpace(streamContentId))
             {
-                inventory.Diagnostics.Add(new("Warning", "Diagram", "ownedDiagram has no binaryObject streamContentID.", documentName));
+                inventory.Diagnostics.Add(new("Warning", "Diagram", $"'{name}' has no binaryObject streamContentID.", documentName));
                 continue;
             }
 
             var binaryEntry = FindEntry(archive, streamContentId);
             if (binaryEntry is null)
             {
-                inventory.Diagnostics.Add(new("Warning", "Diagram", $"Referenced diagram payload '{streamContentId}' was not found.", documentName));
+                inventory.Diagnostics.Add(new("Warning", "Diagram", $"Payload '{streamContentId}' for '{name}' was not found.", documentName));
                 continue;
             }
 
-            ParseDiagramPayload(binaryEntry, diagramId, inventory);
+            ParseDiagramPayload(binaryEntry, diagramId, name, inventory);
         }
     }
 
@@ -209,45 +208,62 @@ public sealed class PortedMagicDrawParser
         ?? archive.Entries.FirstOrDefault(e => e.Name.Equals(streamContentId, StringComparison.OrdinalIgnoreCase))
         ?? archive.Entries.FirstOrDefault(e => e.FullName.EndsWith("/" + streamContentId, StringComparison.OrdinalIgnoreCase));
 
-    private static void ParseDiagramPayload(ZipArchiveEntry entry, string diagramId, MdzipInventory inventory)
+    private static void ParseDiagramPayload(ZipArchiveEntry entry, string diagramId, string diagramName, MdzipInventory inventory)
     {
         XDocument diagram;
         try
         {
             using var stream = entry.Open();
-            diagram = XDocument.Load(stream, LoadOptions.PreserveWhitespace);
+            using var reader = CreateMagicDrawXmlReader(stream);
+            diagram = XDocument.Load(reader, LoadOptions.PreserveWhitespace);
         }
-        catch (Exception ex) when (ex is System.Xml.XmlException or InvalidDataException)
+        catch (Exception ex) when (ex is XmlException or InvalidDataException)
         {
-            inventory.Diagnostics.Add(new("Error", "Diagram", ex.Message, entry.FullName));
+            inventory.Diagnostics.Add(new("Error", "Diagram", $"'{diagramName}': {ex.Message}", entry.FullName));
             return;
         }
 
-        foreach (var mdElement in diagram.Descendants().Where(e => Local(e) == "mdElement"))
+        var mdElements = diagram.Root is null
+            ? []
+            : diagram.Root.DescendantsAndSelf().Where(e => Local(e) == "mdElement").ToList();
+
+        var before = inventory.Presentations.Count;
+        foreach (var mdElement in mdElements)
         {
             var presentationId = Attr(mdElement, "id") ?? "presentation-" + inventory.Presentations.Count;
             var elementClass = Attr(mdElement, "elementClass") ?? "PresentationElement";
             var elementId = GetElementId(mdElement);
-            var geometry = Descendants(mdElement, "geometry").Select(e => e.Value).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+            var geometry = DescendantsAndSelf(mdElement, "geometry")
+                .Select(e => e.Value)
+                .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
             var bounds = ParseMagicDrawGeometry(geometry);
 
             if (elementClass.Equals("Note", StringComparison.OrdinalIgnoreCase))
             {
-                var text = Descendants(mdElement, "text").Select(e => e.Value).FirstOrDefault() ?? string.Empty;
+                var text = DescendantsAndSelf(mdElement, "text").Select(e => e.Value).FirstOrDefault() ?? string.Empty;
                 var noteId = Attr(mdElement, "id") ?? presentationId;
                 if (bounds is not null)
                     inventory.Notes.Add(new(noteId, diagramId, text, elementId, bounds, entry.FullName));
                 elementId ??= noteId;
+                if (!inventory.Elements.Any(e => e.Id.Equals(noteId, StringComparison.Ordinal)))
+                    inventory.Elements.Add(new(noteId, string.IsNullOrWhiteSpace(text) ? "Note" : text, "Note", entry.FullName, null, "Note"));
             }
 
-            if (string.IsNullOrWhiteSpace(elementId) && !elementClass.Equals("Split", StringComparison.OrdinalIgnoreCase))
+            if (elementClass.Equals("Split", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(elementId))
+            {
+                elementId = presentationId;
+                if (!inventory.Elements.Any(e => e.Id.Equals(elementId, StringComparison.Ordinal)))
+                    inventory.Elements.Add(new(elementId, "Split", "Split", entry.FullName, null, "Split"));
+            }
+
+            if (string.IsNullOrWhiteSpace(elementId))
                 continue;
 
             var route = IsConnectorClass(elementClass) ? ParseRoute(geometry) : [];
             inventory.Presentations.Add(new(
                 presentationId,
                 diagramId,
-                elementId ?? presentationId,
+                elementId,
                 elementClass,
                 bounds,
                 route,
@@ -256,33 +272,58 @@ public sealed class PortedMagicDrawParser
             if (elementClass.Equals("ControlFlow", StringComparison.OrdinalIgnoreCase))
                 ParseGuard(mdElement, diagram, diagramId, entry.FullName, inventory);
         }
+
+        var added = inventory.Presentations.Count - before;
+        inventory.Diagnostics.Add(new(
+            added > 0 ? "Info" : "Warning",
+            "Diagram",
+            $"'{diagramName}': {mdElements.Count} mdElement records, {added} drawable presentations.",
+            entry.FullName));
+    }
+
+    private static XmlReader CreateMagicDrawXmlReader(Stream stream)
+    {
+        var nameTable = new NameTable();
+        var namespaceManager = new XmlNamespaceManager(nameTable);
+        namespaceManager.AddNamespace("xmi", "http://www.omg.org/spec/XMI/20131001");
+        var context = new XmlParserContext(nameTable, namespaceManager, string.Empty, XmlSpace.Default);
+        var settings = new XmlReaderSettings
+        {
+            NameTable = nameTable,
+            DtdProcessing = DtdProcessing.Prohibit,
+            IgnoreComments = false,
+            IgnoreWhitespace = false
+        };
+        return XmlReader.Create(stream, settings, context);
     }
 
     private static void ParseGuard(XElement flow, XDocument diagram, string diagramId, string documentName, MdzipInventory inventory)
     {
-        var text = Descendants(flow, "text").Select(e => e.Value).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+        var text = DescendantsAndSelf(flow, "text").Select(e => e.Value).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
         if (string.IsNullOrWhiteSpace(text))
             return;
-
         var firstEnd = FirstReference(flow, "linkFirstEndID");
         var secondEnd = FirstReference(flow, "linkSecondEndID");
-        var source = ResolvePresentationElementId(diagram, secondEnd);
-        var target = ResolvePresentationElementId(diagram, firstEnd);
-        inventory.Guards.Add(new(diagramId, text, source, target, documentName));
+        inventory.Guards.Add(new(
+            diagramId,
+            text,
+            ResolvePresentationElementId(diagram, secondEnd),
+            ResolvePresentationElementId(diagram, firstEnd),
+            documentName));
     }
 
     private static string? ResolvePresentationElementId(XDocument diagram, string? presentationId)
     {
         if (presentationId is null)
             return null;
-        var mdElement = diagram.Descendants().FirstOrDefault(e =>
+        var mdElement = diagram.Root?.DescendantsAndSelf().FirstOrDefault(e =>
             Local(e) == "mdElement" && Attr(e, "id") == presentationId);
         return mdElement is null ? null : GetElementId(mdElement);
     }
 
     private static string? GetElementId(XElement mdElement)
     {
-        var elementIdNode = Descendants(mdElement, "elementID").FirstOrDefault();
+        var elementIdNode = DescendantsAndSelf(mdElement, "elementID").FirstOrDefault();
         return elementIdNode is null
             ? null
             : NormalizeReference(Attr(elementIdNode, "href") ?? Attr(elementIdNode, "idref") ?? Attr(elementIdNode, "id") ?? elementIdNode.Value);
@@ -293,12 +334,13 @@ public sealed class PortedMagicDrawParser
         var values = ParseIntegers(geometry).Take(4).ToArray();
         if (values.Length < 4)
             return null;
-
         var x = values[0];
         var y = values[1];
         var right = values[2];
         var bottom = values[3];
-        return new LayoutBounds(x, y, Math.Max(1, right - x), Math.Max(1, bottom - y));
+        var width = right - x;
+        var height = bottom - y;
+        return width > 0 && height > 0 ? new(x, y, width, height) : null;
     }
 
     private static IReadOnlyList<LayoutPoint> ParseRoute(string? geometry)
@@ -332,6 +374,9 @@ public sealed class PortedMagicDrawParser
     private static IEnumerable<XElement> Descendants(XElement root, string localName) =>
         root.Descendants().Where(e => Local(e).Equals(localName, StringComparison.OrdinalIgnoreCase));
 
+    private static IEnumerable<XElement> DescendantsAndSelf(XElement root, string localName) =>
+        root.DescendantsAndSelf().Where(e => Local(e).Equals(localName, StringComparison.OrdinalIgnoreCase));
+
     private static string Local(XElement element) => element.Name.LocalName;
 
     private static string? Attr(XElement? element, string localName) =>
@@ -350,7 +395,6 @@ public sealed class PortedMagicDrawParser
             var direct = References(Attr(element, name)).FirstOrDefault();
             if (direct is not null)
                 return direct;
-
             var child = element.Elements().FirstOrDefault(e => Local(e).Equals(name, StringComparison.OrdinalIgnoreCase));
             if (child is null)
                 continue;
