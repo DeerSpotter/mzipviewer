@@ -35,7 +35,8 @@ public sealed record ModelDiagram(
     string Name,
     string Type,
     string Document,
-    string? OwnerId);
+    string? OwnerId,
+    string? StreamContentId);
 
 public sealed record ModelRelationship(
     string Id,
