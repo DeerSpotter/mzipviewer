@@ -12,6 +12,16 @@ public sealed class MdzipReader
         "com.nomagic.magicdraw.uml_model.shared_model"
     ];
 
+    private static readonly string[] SourceAttributeNames =
+    [
+        "source", "client", "specific", "informationSource", "end1", "from", "supplierDependency"
+    ];
+
+    private static readonly string[] TargetAttributeNames =
+    [
+        "target", "supplier", "general", "informationTarget", "end2", "to", "clientDependency"
+    ];
+
     public MdzipInventory Read(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -84,18 +94,77 @@ public sealed class MdzipReader
                 var name = AttributeValue(element, "name") ?? "(unnamed)";
                 var ownerId = AttributeValue(element.Parent, "id");
                 var humanType = AttributeValue(element, "humanType");
-
                 var normalizedType = NormalizeType(type);
+
                 inventory.Elements.Add(new ModelElement(id, name, normalizedType, entry.FullName, ownerId, humanType));
 
                 if (LooksLikeDiagram(element, normalizedType, humanType))
                     inventory.Diagrams.Add(new ModelDiagram(id, name, normalizedType, entry.FullName, ownerId));
+
+                if (MdzipTypeClassifier.IsRelationship(normalizedType))
+                {
+                    var sourceId = FindReference(element, SourceAttributeNames);
+                    var targetId = FindReference(element, TargetAttributeNames);
+
+                    if (string.IsNullOrWhiteSpace(sourceId) || string.IsNullOrWhiteSpace(targetId))
+                    {
+                        var memberEnds = SplitReferences(AttributeValue(element, "memberEnd")).Take(2).ToArray();
+                        if (memberEnds.Length == 2)
+                        {
+                            sourceId ??= memberEnds[0];
+                            targetId ??= memberEnds[1];
+                        }
+                    }
+
+                    inventory.Relationships.Add(new ModelRelationship(
+                        id, name, normalizedType, entry.FullName, ownerId, sourceId, targetId));
+                }
             }
         }
         catch (Exception ex) when (ex is System.Xml.XmlException or InvalidDataException)
         {
             // Some archives contain auxiliary XML that is not model content.
             // Ignore those entries and continue with the primary model documents.
+        }
+    }
+
+    private static string? FindReference(XElement element, IEnumerable<string> names)
+    {
+        foreach (var name in names)
+        {
+            var value = AttributeValue(element, name);
+            var reference = SplitReferences(value).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(reference))
+                return reference;
+        }
+
+        foreach (var child in element.Elements())
+        {
+            if (!names.Any(name => child.Name.LocalName.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            var reference = SplitReferences(
+                AttributeValue(child, "idref") ?? AttributeValue(child, "href") ?? child.Value)
+                .FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(reference))
+                return reference;
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> SplitReferences(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            yield break;
+
+        foreach (var token in value.Split([' ', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var normalized = token;
+            var hashIndex = normalized.LastIndexOf('#');
+            if (hashIndex >= 0 && hashIndex + 1 < normalized.Length)
+                normalized = normalized[(hashIndex + 1)..];
+            yield return normalized;
         }
     }
 
