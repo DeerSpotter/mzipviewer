@@ -11,6 +11,7 @@ public sealed class MdzipInventory
     public List<ModelElement> Elements { get; } = [];
     public List<ModelDiagram> Diagrams { get; } = [];
     public List<ModelRelationship> Relationships { get; } = [];
+    public List<DiagramPresentation> Presentations { get; } = [];
 
     [JsonIgnore]
     public int PackageCount => Elements.Count(e => e.Type.EndsWith("Package", StringComparison.OrdinalIgnoreCase));
@@ -44,6 +45,19 @@ public sealed record ModelRelationship(
     string? OwnerId,
     string? SourceId,
     string? TargetId);
+
+public sealed record LayoutPoint(double X, double Y);
+
+public sealed record LayoutBounds(double X, double Y, double Width, double Height);
+
+public sealed record DiagramPresentation(
+    string PresentationId,
+    string DiagramId,
+    string ModelElementId,
+    string PresentationType,
+    LayoutBounds? Bounds,
+    IReadOnlyList<LayoutPoint> RoutePoints,
+    string Document);
 
 internal static class MdzipTypeClassifier
 {
