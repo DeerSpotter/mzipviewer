@@ -1,0 +1,40 @@
+name: MDZip Viewer Build
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "MDZipViewer/**"
+      - ".github/workflows/mdzipviewer-build.yml"
+  pull_request:
+    paths:
+      - "MDZipViewer/**"
+      - ".github/workflows/mdzipviewer-build.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore .\MDZipViewer\MDZipViewer.csproj
+
+      - name: Build
+        run: dotnet build .\MDZipViewer\MDZipViewer.csproj -c Release --no-restore
+
+      - name: Publish portable test artifact
+        run: dotnet publish .\MDZipViewer\MDZipViewer.csproj -c Release -r win-x64 --self-contained false --no-restore -o .\artifacts\MDZipViewer
+
+      - name: Upload viewer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MDZipViewer-win-x64
+          path: artifacts/MDZipViewer
