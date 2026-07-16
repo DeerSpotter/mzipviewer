@@ -12,6 +12,12 @@ public sealed class MdzipInventory
     public List<ModelDiagram> Diagrams { get; } = [];
     public List<ModelRelationship> Relationships { get; } = [];
     public List<DiagramPresentation> Presentations { get; } = [];
+    public List<DiagramNote> Notes { get; } = [];
+    public List<ModelConstraint> Constraints { get; } = [];
+    public List<ModelLifeline> Lifelines { get; } = [];
+    public List<ModelMessage> Messages { get; } = [];
+    public List<ModelGuard> Guards { get; } = [];
+    public List<ParseDiagnostic> Diagnostics { get; } = [];
 
     [JsonIgnore]
     public int PackageCount => Elements.Count(e => e.Type.EndsWith("Package", StringComparison.OrdinalIgnoreCase));
