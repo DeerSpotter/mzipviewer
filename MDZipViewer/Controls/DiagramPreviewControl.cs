@@ -223,7 +223,7 @@ public sealed class DiagramPreviewControl : UserControl
             var p1 = new Point(end.X - (int)(length * Math.Cos(angle - spread)), end.Y - (int)(length * Math.Sin(angle - spread)));
             var p2 = new Point(end.X - (int)(length * Math.Cos(angle + spread)), end.Y - (int)(length * Math.Sin(angle + spread)));
             using var brush = new SolidBrush(color);
-            graphics.FillPolygon(brush, [end, p1, p2]);
+            graphics.FillPolygon(brush, new Point[] { end, p1, p2 });
         }
 
         private static Point Center(Rectangle rectangle) => new(rectangle.Left + rectangle.Width / 2, rectangle.Top + rectangle.Height / 2);
