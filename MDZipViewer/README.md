@@ -78,13 +78,16 @@ powershell -ExecutionPolicy Bypass -File .\MDZipViewer\build-and-run.ps1 "C:\Pat
 3. Choose a non-sensitive test project.
 4. Confirm the summary displays package, element, relationship, and diagram counts.
 5. Open the **Diagram Preview** tab.
-6. Select several diagrams from the selector and verify nodes and directional connectors are drawn.
-7. Confirm the preview can scroll when the reconstructed diagram is larger than the window.
-8. Open the **Elements** tab and verify named model elements appear.
-9. Open the **Model documents** tab and confirm the primary MagicDraw model entry is listed.
-10. Open the **Archive entries** tab and confirm the complete archive contents are shown.
-11. Select **Export inventory JSON**.
-12. Open the exported JSON and confirm it contains `Documents`, `Elements`, `Diagrams`, and `Relationships` collections.
+6. Select several diagrams from the selector.
+7. Verify labeled boxes appear for detected model elements.
+8. Verify arrowed connectors appear where source and target references were parsed.
+9. Confirm the banner says the preview is approximate and reconstructed.
+10. Confirm the preview can scroll when it is larger than the window.
+11. Open the **Elements** tab and verify named model elements appear.
+12. Open the **Model documents** tab and confirm the primary MagicDraw model entry is listed.
+13. Open the **Archive entries** tab and confirm the complete archive contents are shown.
+14. Select **Export inventory JSON**.
+15. Open the exported JSON and confirm it contains `Documents`, `Elements`, `Diagrams`, and `Relationships` collections.
 
 ## Publish a standalone executable
 
