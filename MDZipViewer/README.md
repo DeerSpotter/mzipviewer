@@ -24,11 +24,14 @@ It does not require Enterprise Architect or Cameo to be installed for basic arch
 - Detect and parse MagicDraw model XML
 - List model elements with ID, name, type, owning element, and source document
 - Detect likely diagram records
+- Parse common relationship source and target references
+- Preview detected diagrams as automatically arranged nodes and directional connectors
+- Scroll large reconstructed previews
 - Count packages, elements, relationships, and diagrams
 - Export the inventory to formatted JSON
 - Accept an `.mdzip` path as the first command line argument
 
-This is the first standalone viewer milestone. Exact graphical reconstruction of Cameo diagrams is not included yet.
+The diagram preview is a reconstructed view. It uses detected diagram ownership, model elements, and relationships. It does not yet reproduce Cameo's exact symbol coordinates, styling, compartments, or connector routing.
 
 ## Requirements
 
@@ -74,11 +77,14 @@ powershell -ExecutionPolicy Bypass -File .\MDZipViewer\build-and-run.ps1 "C:\Pat
 2. Select **Open .mdzip**.
 3. Choose a non-sensitive test project.
 4. Confirm the summary displays package, element, relationship, and diagram counts.
-5. Open the **Elements** tab and verify named model elements appear.
-6. Open the **Model documents** tab and confirm the primary MagicDraw model entry is listed.
-7. Open the **Archive entries** tab and confirm the complete archive contents are shown.
-8. Select **Export inventory JSON**.
-9. Open the exported JSON and confirm it contains `Documents`, `Elements`, and `Diagrams` collections.
+5. Open the **Diagram Preview** tab.
+6. Select several diagrams from the selector and verify nodes and directional connectors are drawn.
+7. Confirm the preview can scroll when the reconstructed diagram is larger than the window.
+8. Open the **Elements** tab and verify named model elements appear.
+9. Open the **Model documents** tab and confirm the primary MagicDraw model entry is listed.
+10. Open the **Archive entries** tab and confirm the complete archive contents are shown.
+11. Select **Export inventory JSON**.
+12. Open the exported JSON and confirm it contains `Documents`, `Elements`, `Diagrams`, and `Relationships` collections.
 
 ## Publish a standalone executable
 
@@ -95,7 +101,9 @@ MDZipViewer\bin\Release\net8.0-windows\win-x64\publish\
 ## Known limitations
 
 - Diagram detection is currently heuristic.
-- Diagram canvas positions and connector routing are not reconstructed.
+- Diagram membership is inferred primarily from owning elements and source documents.
+- Original Cameo canvas positions, symbol styling, compartments, and connector routing are not yet reconstructed.
+- Some relationship types may store endpoints in vendor-specific structures that are not mapped yet.
 - Custom profiles and stereotypes are listed as model elements but are not yet normalized into a dedicated SysML view.
 - Teamwork Cloud metadata is not resolved.
 - Cross-project references are not yet followed into external `.mdzip` files.
