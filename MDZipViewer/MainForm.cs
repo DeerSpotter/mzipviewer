@@ -11,6 +11,7 @@ public sealed class MainForm : Form
     private readonly Label _summary = new() { AutoSize = true, Padding = new Padding(8) };
     private readonly DataGridView _elements = CreateGrid();
     private readonly DataGridView _diagrams = CreateGrid();
+    private readonly DataGridView _diagnostics = CreateGrid();
     private readonly DiagramPreviewControl _diagramPreview = new();
     private readonly ListBox _documents = new() { Dock = DockStyle.Fill };
     private readonly ListBox _entries = new() { Dock = DockStyle.Fill, HorizontalScrollbar = true };
@@ -43,6 +44,7 @@ public sealed class MainForm : Form
 
         var tabs = new TabControl { Dock = DockStyle.Fill };
         tabs.TabPages.Add(CreatePage("Diagram Preview", _diagramPreview));
+        tabs.TabPages.Add(CreatePage("Diagnostics", _diagnostics));
         tabs.TabPages.Add(CreatePage("Elements", _elements));
         tabs.TabPages.Add(CreatePage("Diagrams", _diagrams));
         tabs.TabPages.Add(CreatePage("Model documents", _documents));
@@ -110,9 +112,17 @@ public sealed class MainForm : Form
 
     private void BindInventory(MdzipInventory inventory)
     {
-        _summary.Text = $"Packages: {inventory.PackageCount:N0}   Elements: {inventory.Elements.Count:N0}   Relationships: {inventory.RelationshipCount:N0}   Diagrams: {inventory.Diagrams.Count:N0}";
+        _summary.Text =
+            $"Packages: {inventory.PackageCount:N0}   " +
+            $"Elements: {inventory.Elements.Count:N0}   " +
+            $"Relationships: {inventory.RelationshipCount:N0}   " +
+            $"Diagrams: {inventory.Diagrams.Count:N0}   " +
+            $"Presentations: {inventory.Presentations.Count:N0}   " +
+            $"Diagnostics: {inventory.Diagnostics.Count:N0}";
+
         _elements.DataSource = inventory.Elements.OrderBy(e => e.Type).ThenBy(e => e.Name).ToList();
         _diagrams.DataSource = inventory.Diagrams.OrderBy(d => d.Type).ThenBy(d => d.Name).ToList();
+        _diagnostics.DataSource = inventory.Diagnostics.ToList();
         _diagramPreview.Bind(inventory);
 
         _documents.Items.Clear();
