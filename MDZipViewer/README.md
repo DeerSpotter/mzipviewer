@@ -24,20 +24,18 @@ It does not require Enterprise Architect or Cameo to be installed for basic arch
 - Detect and parse MagicDraw model XML
 - List model elements with ID, name, type, owning element, and source document
 - Detect likely diagram records
-- Parse common relationship source and target references
-- Preview detected diagrams as automatically arranged nodes and directional connectors
-- Scroll large reconstructed previews
+- Parse relationship source and target references
+- Preview diagrams visually
+- Preserve stored symbol coordinates and dimensions when available
+- Preserve stored connector waypoint sequences when available
+- Place only unresolved presentation elements in a fallback layout area
 - Count packages, elements, relationships, and diagrams
-- Export the inventory to formatted JSON
+- Export the inventory, including presentation records, to formatted JSON
 - Accept an `.mdzip` path as the first command line argument
-
-The diagram preview is a reconstructed view. It uses detected diagram ownership, model elements, and relationships. It does not yet reproduce Cameo's exact symbol coordinates, styling, compartments, or connector routing.
 
 ## Requirements
 
 Install the .NET 8 SDK for Windows.
-
-Confirm it is available:
 
 ```powershell
 dotnet --version
@@ -45,23 +43,12 @@ dotnet --version
 
 The version should begin with `8.` or newer.
 
-## Build
+## Build and run
 
 From the repository root:
 
 ```powershell
 dotnet build .\MDZipViewer\MDZipViewer.csproj -c Release
-```
-
-## Run
-
-```powershell
-dotnet run --project .\MDZipViewer\MDZipViewer.csproj -c Release
-```
-
-Or use the included launcher:
-
-```powershell
 powershell -ExecutionPolicy Bypass -File .\MDZipViewer\build-and-run.ps1
 ```
 
@@ -71,23 +58,25 @@ Open a specific project immediately:
 powershell -ExecutionPolicy Bypass -File .\MDZipViewer\build-and-run.ps1 "C:\Path\Project.mdzip"
 ```
 
-## Manual test procedure
+## Diagram preservation test
 
-1. Start the application.
-2. Select **Open .mdzip**.
-3. Choose a non-sensitive test project.
-4. Confirm the summary displays package, element, relationship, and diagram counts.
-5. Open the **Diagram Preview** tab.
-6. Select several diagrams from the selector.
-7. Verify labeled boxes appear for detected model elements.
-8. Verify arrowed connectors appear where source and target references were parsed.
-9. Confirm the banner says the preview is approximate and reconstructed.
-10. Confirm the preview can scroll when it is larger than the window.
-11. Open the **Elements** tab and verify named model elements appear.
-12. Open the **Model documents** tab and confirm the primary MagicDraw model entry is listed.
-13. Open the **Archive entries** tab and confirm the complete archive contents are shown.
-14. Select **Export inventory JSON**.
-15. Open the exported JSON and confirm it contains `Documents`, `Elements`, `Diagrams`, and `Relationships` collections.
+1. Start the application and open a non-sensitive `.mdzip`.
+2. Open **Diagram Preview** and select several diagrams.
+3. Confirm the banner reports **Preserved layout** when stored presentation records are found.
+4. Compare symbol positions, relative spacing, sizes, and connector routes with Cameo.
+5. Confirm unresolved symbols appear in a separate fallback area instead of replacing preserved positions.
+6. Export inventory JSON and confirm it contains `Presentations`.
+
+The reader recognizes multiple presentation encodings used by MagicDraw releases:
+
+- `x`, `y`, `width`, and `height`
+- abbreviated `w` and `h`
+- `bounds`, `geometry`, `rectangle`, and `rect` strings
+- model references including `elementID`, `modelElement`, `representedElement`, and `subject`
+- diagram references including `diagramID`, `diagram`, and ancestor diagram ownership
+- connector routes in `points`, `path`, `waypoints`, `route`, and edge geometry
+
+The coordinate origin is normalized for display while relative positions, sizes, and stored route shapes are retained. Very large coordinate systems are scaled down uniformly.
 
 ## Publish a standalone executable
 
@@ -95,7 +84,7 @@ powershell -ExecutionPolicy Bypass -File .\MDZipViewer\build-and-run.ps1 "C:\Pat
 dotnet publish .\MDZipViewer\MDZipViewer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
-The output is written under:
+Output:
 
 ```text
 MDZipViewer\bin\Release\net8.0-windows\win-x64\publish\
@@ -103,10 +92,8 @@ MDZipViewer\bin\Release\net8.0-windows\win-x64\publish\
 
 ## Known limitations
 
-- Diagram detection is currently heuristic.
-- Diagram membership is inferred primarily from owning elements and source documents.
-- Original Cameo canvas positions, symbol styling, compartments, and connector routing are not yet reconstructed.
-- Some relationship types may store endpoints in vendor-specific structures that are not mapped yet.
-- Custom profiles and stereotypes are listed as model elements but are not yet normalized into a dedicated SysML view.
-- Teamwork Cloud metadata is not resolved.
-- Cross-project references are not yet followed into external `.mdzip` files.
+- Presentation storage varies by Cameo and MagicDraw version, so a sample project may reveal another mapping that must be added.
+- Custom symbol shapes, colors, fonts, compartments, ports, and icons are not yet reproduced exactly.
+- Some relationship endpoint formats may still require version-specific mappings.
+- Custom profiles and stereotypes are not yet normalized into a dedicated SysML view.
+- Teamwork Cloud metadata and external project references are not yet resolved.
