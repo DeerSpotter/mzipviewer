@@ -9,29 +9,43 @@ A standalone Windows viewer for CATIA Magic / Cameo / MagicDraw `.mdzip` project
 - Windows Forms
 - No third party NuGet packages
 
-The viewer reads the `.mdzip` as a ZIP archive and inspects MagicDraw model XML such as:
+The viewer reads the `.mdzip` as a ZIP archive and processes MagicDraw model content such as:
 
 - `com.nomagic.magicdraw.uml_model.model`
 - `com.nomagic.magicdraw.uml_model.shared_model`
-- `.mdxml` and XML model entries
+- `ownedDiagram` records
+- diagram payloads referenced by `binaryObject streamContentID`
 
-It does not require Enterprise Architect or Cameo to be installed for basic archive inspection.
+It does not require Enterprise Architect or Cameo to be installed for archive inspection.
 
 ## Current functionality
 
 - Open one `.mdzip` file
 - Inventory all archive entries
-- Detect and parse MagicDraw model XML
-- List model elements with ID, name, type, owning element, and source document
-- Detect likely diagram records
-- Parse relationship source and target references
-- Preview diagrams visually
-- Preserve stored symbol coordinates and dimensions when available
-- Preserve stored connector waypoint sequences when available
-- Place only unresolved presentation elements in a fallback layout area
-- Count packages, elements, relationships, and diagrams
-- Export the inventory, including presentation records, to formatted JSON
-- Accept an `.mdzip` path as the first command line argument
+- Parse UML and SysML model elements and relationships
+- Read real MagicDraw `ownedDiagram` records
+- Resolve each diagram's referenced `BINARY-*` payload
+- Parse `mdElement`, `elementID`, `elementClass`, and `geometry`
+- Preserve stored symbol coordinates and dimensions
+- Preserve stored connector waypoint sequences when represented in geometry
+- Render notes and split presentation elements
+- Place only unresolved elements in a fallback area
+- Export model and presentation records to formatted JSON
+
+Diagram IDs follow the same convention used by the Enterprise Architect MagicDraw migrator: `ownerOfDiagram + separator + diagram name`.
+
+MagicDraw diagram geometry is interpreted as:
+
+```text
+x,y,right,bottom
+```
+
+The viewer converts this to display width and height using:
+
+```text
+width  = right - x
+height = bottom - y
+```
 
 ## Requirements
 
@@ -58,25 +72,22 @@ Open a specific project immediately:
 powershell -ExecutionPolicy Bypass -File .\MDZipViewer\build-and-run.ps1 "C:\Path\Project.mdzip"
 ```
 
-## Diagram preservation test
+## Diagram processing test
 
 1. Start the application and open a non-sensitive `.mdzip`.
 2. Open **Diagram Preview** and select several diagrams.
-3. Confirm the banner reports **Preserved layout** when stored presentation records are found.
-4. Compare symbol positions, relative spacing, sizes, and connector routes with Cameo.
-5. Confirm unresolved symbols appear in a separate fallback area instead of replacing preserved positions.
-6. Export inventory JSON and confirm it contains `Presentations`.
+3. Confirm the diagram selector lists names from actual `ownedDiagram` records.
+4. Confirm the status reports positioned symbols when the referenced binary payload was parsed.
+5. Compare symbol positions, relative spacing, dimensions, and connector paths with Cameo.
+6. Export inventory JSON and inspect `StreamContentId` and `Presentations`.
+7. Confirm presentation records reference the actual binary archive entry.
 
-The reader recognizes multiple presentation encodings used by MagicDraw releases:
+## Reference implementations
 
-- `x`, `y`, `width`, and `height`
-- abbreviated `w` and `h`
-- `bounds`, `geometry`, `rectangle`, and `rect` strings
-- model references including `elementID`, `modelElement`, `representedElement`, and `subject`
-- diagram references including `diagramID`, `diagram`, and ancestor diagram ownership
-- connector routes in `points`, `path`, `waypoints`, `route`, and edge geometry
+The real diagram-processing path is based on the open-source implementations in:
 
-The coordinate origin is normalized for display while relative positions, sizes, and stored route shapes are retained. Very large coordinate systems are scaled down uniformly.
+- `GeertBellekens/Enterprise-Architect-Toolpack`, particularly `MagicdrawMigrator/MagicDrawReader.cs`, `MDDiagram.cs`, and `MDDiagramObject.cs`
+- `JPLOpenSource/SCA`, particularly its `MagicDrawReader.java` archive and XMI handling
 
 ## Publish a standalone executable
 
@@ -92,8 +103,7 @@ MDZipViewer\bin\Release\net8.0-windows\win-x64\publish\
 
 ## Known limitations
 
-- Presentation storage varies by Cameo and MagicDraw version, so a sample project may reveal another mapping that must be added.
-- Custom symbol shapes, colors, fonts, compartments, ports, and icons are not yet reproduced exactly.
-- Some relationship endpoint formats may still require version-specific mappings.
+- Custom Cameo symbol shapes, colors, fonts, compartments, ports, and icons are not yet reproduced exactly.
+- Some edge geometries may use version-specific encodings beyond semicolon-separated waypoints.
 - Custom profiles and stereotypes are not yet normalized into a dedicated SysML view.
 - Teamwork Cloud metadata and external project references are not yet resolved.
